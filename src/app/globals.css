@@ -112,6 +112,14 @@
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono);
+
+  /* Radius */
+  --radius-sm: var(--radius-sm);
+  --radius-lg: var(--radius-lg);
+
+  /* Shadows */
+  --shadow-float: var(--shadow-float);
+  --shadow-modal: var(--shadow-modal);
 }
 
 /* ============================================================

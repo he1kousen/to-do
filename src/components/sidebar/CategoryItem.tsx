@@ -1,6 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  ChevronRight,
+  Folder,
+  Plus,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  CheckSquare,
+  LayoutGrid,
+} from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Category } from '@/lib/hooks/use-categories';
 import type { Project } from '@/lib/hooks/use-projects';
@@ -69,28 +79,31 @@ export default function CategoryItem({
   };
 
   return (
-    <div className="mb-1">
+    <div className="mb-0.5">
       {/* Category header */}
-      <div className={`group flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${isActive ? 'bg-indigo-500/15' : 'hover:bg-white/5'}`}>
+      <div
+        className={`group flex items-center gap-1 rounded-sm px-2 py-1.5 transition-colors ${
+          isActive ? 'bg-signal-teal/10' : 'hover:bg-mist'
+        }`}
+      >
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400 transition-colors hover:text-slate-200"
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#8B929A] transition-colors hover:text-graphite"
         >
-          <svg
-            className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          <ChevronRight
+            className={`h-3.5 w-3.5 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
+            strokeWidth={2}
+          />
         </button>
 
         <div
           onClick={() => onSelectCategory(category)}
           className="flex min-w-0 flex-1 cursor-pointer items-center gap-2"
         >
-          <span className="text-indigo-400">📁</span>
+          <Folder
+            className={`h-4 w-4 shrink-0 ${isActive ? 'text-signal-teal' : 'text-[#8B929A]'}`}
+            strokeWidth={1.5}
+          />
           {isEditing ? (
             <input
               autoFocus
@@ -105,7 +118,7 @@ export default function CategoryItem({
                 }
               }}
               onClick={(e) => e.stopPropagation()}
-              className="flex-1 bg-transparent text-sm font-medium text-slate-200 outline-none"
+              className="flex-1 bg-transparent text-body-sm font-medium text-graphite outline-none"
             />
           ) : (
             <span
@@ -114,7 +127,9 @@ export default function CategoryItem({
                 setEditName(category.name);
                 setIsEditing(true);
               }}
-              className={`truncate text-sm font-medium ${isActive ? 'text-indigo-300' : 'text-slate-200'}`}
+              className={`truncate text-body-sm font-medium ${
+                isActive ? 'text-signal-teal' : 'text-graphite'
+              }`}
             >
               {category.name}
             </span>
@@ -125,33 +140,27 @@ export default function CategoryItem({
         <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             onClick={() => setShowProjectForm(true)}
-            className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-white/10 hover:text-slate-200"
-            title="Add project"
+            className="flex h-5 w-5 items-center justify-center rounded text-[#8B929A] transition-colors hover:bg-cloud hover:text-graphite"
+            title="Tambah project"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <Plus className="h-3.5 w-3.5" strokeWidth={2} />
           </button>
           <button
             onClick={() => {
               setEditName(category.name);
               setIsEditing(true);
             }}
-            className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-white/10 hover:text-slate-200"
+            className="flex h-5 w-5 items-center justify-center rounded text-[#8B929A] transition-colors hover:bg-cloud hover:text-graphite"
             title="Rename"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+            <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
           <button
             onClick={() => setConfirmDeleteCategory(true)}
-            className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-500/20 hover:text-rose-400"
-            title="Delete"
+            className="flex h-5 w-5 items-center justify-center rounded text-[#8B929A] transition-colors hover:bg-red-50 hover:text-danger"
+            title="Hapus"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
         </div>
       </div>
@@ -161,19 +170,19 @@ export default function CategoryItem({
         isOpen={confirmDeleteCategory}
         onClose={() => setConfirmDeleteCategory(false)}
         onConfirm={() => onDeleteCategory(category.id)}
-        title="Delete category"
-        message={`Are you sure you want to delete "${category.name}"? All projects and tasks inside it will also be deleted.`}
+        title="Hapus category"
+        message={`Yakin ingin menghapus "${category.name}"? Semua project dan task di dalamnya juga akan dihapus.`}
       />
 
       {/* Expanded content */}
       {isExpanded && (
-        <div className="ml-4 mt-0.5 border-l border-white/10 pl-2">
+        <div className="ml-4 mt-0.5 border-l border-cloud pl-2">
           {/* New project form */}
           {showProjectForm && (
-            <div className="mb-1 rounded-lg bg-white/5 p-2">
+            <div className="mb-1 rounded-sm border border-cloud bg-mist p-2">
               <input
                 autoFocus
-                placeholder="Project name"
+                placeholder="Nama project"
                 value={newProjectName}
                 onChange={(e) => setNewProjectName(e.target.value)}
                 onKeyDown={(e) => {
@@ -183,46 +192,48 @@ export default function CategoryItem({
                     setShowProjectForm(false);
                   }
                 }}
-                className="mb-2 w-full rounded bg-transparent px-2 py-1 text-sm text-slate-200 outline-none ring-1 ring-white/20 focus:ring-indigo-500"
+                className="mb-2 w-full rounded-sm border border-cloud bg-white px-2 py-1.5 text-body-sm text-graphite outline-none transition-colors focus:border-signal-teal"
               />
               <div className="flex gap-1">
                 <button
                   onClick={() => setNewProjectType('list')}
-                  className={`flex-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                  className={`flex flex-1 items-center justify-center gap-1 rounded-sm px-2 py-1 text-body-sm font-medium transition-colors ${
                     newProjectType === 'list'
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                      ? 'bg-signal-teal text-white'
+                      : 'border border-cloud bg-white text-[#6B7280] hover:bg-mist'
                   }`}
                 >
-                  ☑ List
+                  <CheckSquare className="h-3 w-3" strokeWidth={2} />
+                  List
                 </button>
                 <button
                   onClick={() => setNewProjectType('kanban')}
-                  className={`flex-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                  className={`flex flex-1 items-center justify-center gap-1 rounded-sm px-2 py-1 text-body-sm font-medium transition-colors ${
                     newProjectType === 'kanban'
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                      ? 'bg-signal-teal text-white'
+                      : 'border border-cloud bg-white text-[#6B7280] hover:bg-mist'
                   }`}
                 >
-                  ▦ Kanban
+                  <LayoutGrid className="h-3 w-3" strokeWidth={2} />
+                  Kanban
                 </button>
               </div>
               <div className="mt-2 flex gap-1">
                 <button
                   onClick={handleCreateProject}
                   disabled={!newProjectName.trim()}
-                  className="flex-1 rounded bg-indigo-500 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex-1 rounded-sm bg-signal-teal px-2 py-1 text-body-sm font-medium text-white transition-colors hover:bg-signal-teal-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Create
+                  Buat
                 </button>
                 <button
                   onClick={() => {
                     setNewProjectName('');
                     setShowProjectForm(false);
                   }}
-                  className="flex-1 rounded bg-white/5 px-2 py-1 text-xs font-medium text-slate-400 transition-colors hover:bg-white/10"
+                  className="flex-1 rounded-sm border border-cloud bg-white px-2 py-1 text-body-sm font-medium text-[#6B7280] transition-colors hover:bg-mist"
                 >
-                  Cancel
+                  Batal
                 </button>
               </div>
             </div>
@@ -232,24 +243,26 @@ export default function CategoryItem({
           {categoryProjects.map((project) => (
             <div
               key={project.id}
-              className={`group relative flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors ${
+              className={`group relative flex items-center gap-2 rounded-sm px-2 py-1.5 transition-colors ${
                 activeProjectId === project.id
-                  ? 'bg-indigo-500/15 text-indigo-300'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                  ? 'bg-signal-teal/10 text-signal-teal'
+                  : 'text-[#6B7280] hover:bg-mist hover:text-graphite'
               }`}
             >
               {/* Active indicator */}
               {activeProjectId === project.id && (
-                <div className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-indigo-500" />
+                <div className="absolute -left-2 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-signal-teal" />
               )}
 
               <button
                 onClick={() => onSelectProject(project)}
                 className="flex min-w-0 flex-1 items-center gap-2"
               >
-                <span className="text-xs">
-                  {project.view_type === 'list' ? '☑' : '▦'}
-                </span>
+                {project.view_type === 'list' ? (
+                  <CheckSquare className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                ) : (
+                  <LayoutGrid className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                )}
                 {editingProjectId === project.id ? (
                   <input
                     autoFocus
@@ -261,10 +274,10 @@ export default function CategoryItem({
                       if (e.key === 'Escape') setEditingProjectId(null);
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex-1 bg-transparent text-sm outline-none"
+                    className="flex-1 bg-transparent text-body-sm outline-none"
                   />
                 ) : (
-                  <span className="truncate text-sm">{project.name}</span>
+                  <span className="truncate text-body-sm">{project.name}</span>
                 )}
               </button>
 
@@ -275,17 +288,15 @@ export default function CategoryItem({
                     e.stopPropagation();
                     setOpenMenuId(openMenuId === project.id ? null : project.id);
                   }}
-                  className="flex h-5 w-5 items-center justify-center rounded transition-colors hover:bg-white/10"
+                  className="flex h-5 w-5 items-center justify-center rounded transition-colors hover:bg-cloud"
                 >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                  </svg>
+                  <MoreHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
                 </button>
               </div>
 
               {/* Context menu */}
               {openMenuId === project.id && (
-                <div className="absolute right-0 top-full z-10 mt-1 w-32 rounded-lg bg-slate-800 py-1 shadow-xl ring-1 ring-white/10">
+                <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-sm border border-cloud bg-white py-1 shadow-modal">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -293,11 +304,9 @@ export default function CategoryItem({
                       setEditingProjectName(project.name);
                       setOpenMenuId(null);
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-slate-300 transition-colors hover:bg-white/5"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-body-sm text-graphite transition-colors hover:bg-mist"
                   >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                     Rename
                   </button>
                   <button
@@ -306,12 +315,10 @@ export default function CategoryItem({
                       setConfirmDeleteProject(project.id);
                       setOpenMenuId(null);
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-rose-400 transition-colors hover:bg-white/5"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-body-sm text-danger transition-colors hover:bg-red-50"
                   >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Delete
+                    <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Hapus
                   </button>
                 </div>
               )}
@@ -321,14 +328,14 @@ export default function CategoryItem({
                 isOpen={confirmDeleteProject === project.id}
                 onClose={() => setConfirmDeleteProject(null)}
                 onConfirm={() => onDeleteProject(project.id)}
-                title="Delete project"
-                message={`Are you sure you want to delete "${project.name}"? All tasks inside it will also be deleted.`}
+                title="Hapus project"
+                message={`Yakin ingin menghapus "${project.name}"? Semua task di dalamnya juga akan dihapus.`}
               />
             </div>
           ))}
 
           {categoryProjects.length === 0 && !showProjectForm && (
-            <p className="px-2 py-1 text-xs text-slate-500">No projects yet</p>
+            <p className="px-2 py-1 text-body-sm text-[#8B929A]">Belum ada project</p>
           )}
         </div>
       )}

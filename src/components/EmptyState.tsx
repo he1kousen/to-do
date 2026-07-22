@@ -1,7 +1,9 @@
 'use client';
 
+import { type LucideIcon, CheckSquare } from 'lucide-react';
+
 interface EmptyStateProps {
-  icon: string;
+  icon: LucideIcon;
   title: string;
   description: string;
   action?: {
@@ -10,16 +12,16 @@ interface EmptyStateProps {
   };
 }
 
-export default function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export default function EmptyState({ icon: Icon = CheckSquare, title, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8">
-      <span className="mb-4 text-5xl">{icon}</span>
-      <h3 className="mb-2 text-lg font-semibold text-slate-700">{title}</h3>
-      <p className="mb-6 max-w-sm text-center text-sm text-slate-500">{description}</p>
+      <Icon className="mb-4 h-12 w-12 text-[#C4C9CE]" strokeWidth={1.5} />
+      <h3 className="mb-2 text-display-sm text-graphite">{title}</h3>
+      <p className="mb-6 max-w-sm text-center text-body-md text-[#6B7280]">{description}</p>
       {action && (
         <button
           onClick={action.onClick}
-          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
+          className="rounded-sm bg-signal-teal px-4 py-2 text-body-md font-medium text-white transition-colors hover:bg-signal-teal-hover"
         >
           {action.label}
         </button>
