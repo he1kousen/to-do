@@ -8,7 +8,6 @@ import {
   Trash2,
   Check,
   Circle,
-  Filter,
 } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Pagination from '@/components/ui/Pagination';

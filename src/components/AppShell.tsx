@@ -1,39 +1,39 @@
 'use client';
 
-import { useState } from 'react';
-import { Menu, CheckSquare, LayoutDashboard } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
+import { Menu } from 'lucide-react';
 import ModuleRail, { type ModuleId } from '@/components/sidebar/ModuleRail';
 import ContextualPanel from '@/components/sidebar/ContextualPanel';
-import EmptyState from '@/components/EmptyState';
-import CategoryView from '@/components/CategoryView';
-import IdeasPage from '@/components/ideas/IdeasPage';
-import CalendarPage from '@/components/calendar/CalendarPage';
-import ListView from '@/components/tasks/ListView';
-import KanbanView from '@/components/tasks/KanbanView';
 import { useCategories, type Category } from '@/lib/hooks/use-categories';
 import { useProjects, type Project } from '@/lib/hooks/use-projects';
-import { useTasks } from '@/lib/hooks/use-tasks';
 import { useIdeas } from '@/lib/hooks/use-ideas';
 
-export default function AppShell() {
+interface AppShellProps {
+  children: React.ReactNode;
+}
+
+export default function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
   const { projects, createProject, updateProject, deleteProject } = useProjects();
   const { ideas } = useIdeas();
-  const [activeModule, setActiveModule] = useState<ModuleId>('tasks');
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [railExpanded, setRailExpanded] = useState(true);
 
-  const {
-    tasks,
-    createTask,
-    updateTask,
-    deleteTask,
-    reorderTasks,
-  } = useTasks(activeProject?.id ?? null);
+  // Derive active module from pathname
+  const activeModule: ModuleId = useMemo(() => {
+    if (pathname.startsWith('/tasks')) return 'tasks';
+    if (pathname.startsWith('/ideas')) return 'ideas';
+    if (pathname.startsWith('/calendar')) return 'calendar';
+    if (pathname.startsWith('/dashboard')) return 'dashboard';
+    return 'tasks';
+  }, [pathname]);
 
-  // Derived state
+  const showContextualPanel = activeModule === 'tasks';
+
   const currentProject = activeProject
     ? projects.find((p) => p.id === activeProject.id) ?? activeProject
     : null;
@@ -42,18 +42,8 @@ export default function AppShell() {
     ? categories.find((c) => c.id === activeCategory.id) ?? activeCategory
     : null;
 
-  const openTaskCount = tasks.filter((t) => t.status !== 'done').length;
+  const openTaskCount = 0; // Tasks are now managed per-page
   const unrealizedIdeaCount = ideas.filter((i) => !i.is_realized).length;
-
-  // Handlers
-  const handleSelectModule = (id: ModuleId) => {
-    setActiveModule(id);
-    if (id !== 'tasks') {
-      setActiveCategory(null);
-      setActiveProject(null);
-    }
-    setMobileMenuOpen(false);
-  };
 
   const handleSelectCategory = (category: Category) => {
     setActiveCategory(category);
@@ -65,15 +55,12 @@ export default function AppShell() {
     setActiveCategory(null);
   };
 
-  const showContextualPanel = activeModule === 'tasks';
-
   return (
     <div className="flex h-screen bg-(--color-bg)">
-      {/* ── Desktop: Module Rail (always visible) ── */}
+      {/* ── Desktop: Module Rail ── */}
       <div className="hidden md:flex">
         <ModuleRail
           activeModule={activeModule}
-          onSelectModule={handleSelectModule}
           isExpanded={railExpanded}
           onToggleExpand={() => setRailExpanded(!railExpanded)}
           taskCount={openTaskCount}
@@ -81,7 +68,7 @@ export default function AppShell() {
         />
       </div>
 
-      {/* ── Desktop: Contextual Panel (only for Tasks module) ── */}
+      {/* ── Desktop: Contextual Panel (Tasks only) ── */}
       {showContextualPanel && (
         <div className="hidden md:flex">
           <ContextualPanel
@@ -124,7 +111,6 @@ export default function AppShell() {
       >
         <ModuleRail
           activeModule={activeModule}
-          onSelectModule={handleSelectModule}
           isExpanded={true}
           onToggleExpand={() => setMobileMenuOpen(false)}
           taskCount={openTaskCount}
@@ -165,82 +151,11 @@ export default function AppShell() {
           >
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
-          <span className="ml-3 text-display-sm text-graphite">
-            {activeModule === 'tasks' && currentProject
-              ? currentProject.name
-              : activeModule === 'tasks' && currentCategory
-                ? currentCategory.name
-                : activeModule === 'tasks'
-                  ? 'Tasks'
-                  : activeModule === 'ideas'
-                    ? 'Ideas'
-                    : activeModule === 'calendar'
-                      ? 'Calendar'
-                      : 'Dashboard'}
-          </span>
+          <span className="ml-3 text-display-sm text-graphite capitalize">{activeModule}</span>
         </header>
 
-        {/* Content */}
-        {activeModule === 'ideas' ? (
-          <IdeasPage />
-        ) : activeModule === 'calendar' ? (
-          <CalendarPage />
-        ) : activeModule === 'dashboard' ? (
-          <EmptyState
-            icon={LayoutDashboard}
-            title="Dashboard"
-            description="Ringkasan dari semua module akan tersedia segera."
-          />
-        ) : currentProject ? (
-          <>
-            {/* Project header (desktop only) */}
-            <header className="hidden h-12 items-center justify-between border-b border-cloud bg-white px-6 md:flex">
-              <div className="flex items-center gap-3">
-                <div>
-                  <h2 className="text-display-sm text-graphite">{currentProject.name}</h2>
-                  <p className="text-mono-sm text-[#8B929A]">
-                    {currentProject.view_type === 'list' ? 'List view' : 'Kanban board'}
-                  </p>
-                </div>
-              </div>
-            </header>
-
-            {/* Task content */}
-            <div className="flex-1 overflow-auto">
-              {currentProject.view_type === 'list' ? (
-                <ListView
-                  tasks={tasks}
-                  onCreateTask={createTask}
-                  onUpdateTask={updateTask}
-                  onDeleteTask={deleteTask}
-                  onReorderTasks={reorderTasks}
-                />
-              ) : (
-                <KanbanView
-                  tasks={tasks}
-                  onCreateTask={createTask}
-                  onUpdateTask={updateTask}
-                  onDeleteTask={deleteTask}
-                  onReorderTasks={reorderTasks}
-                />
-              )}
-            </div>
-          </>
-        ) : currentCategory ? (
-          <CategoryView
-            category={currentCategory}
-            projects={projects}
-            tasks={tasks}
-            onSelectProject={handleSelectProject}
-            onCreateProject={() => {}}
-          />
-        ) : (
-          <EmptyState
-            icon={CheckSquare}
-            title="Pilih project"
-            description="Pilih project dari panel kiri untuk melihat dan mengelola task."
-          />
-        )}
+        {/* Page content */}
+        {children}
       </main>
     </div>
   );

@@ -43,7 +43,6 @@ export default function CalendarPage() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [formDate, setFormDate] = useState<string>('');
 
   // Form state
   const [formTitle, setFormTitle] = useState('');

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -16,7 +17,6 @@ export type ModuleId = 'dashboard' | 'tasks' | 'ideas' | 'calendar';
 
 interface ModuleRailProps {
   activeModule: ModuleId;
-  onSelectModule: (id: ModuleId) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
   taskCount?: number;
@@ -37,7 +37,6 @@ const comingSoon = [
 
 export default function ModuleRail({
   activeModule,
-  onSelectModule,
   isExpanded,
   onToggleExpand,
   taskCount,
@@ -72,9 +71,9 @@ export default function ModuleRail({
           const Icon = mod.icon;
 
           return (
-            <button
+            <Link
               key={mod.id}
-              onClick={() => onSelectModule(mod.id)}
+              href={`/${mod.id}`}
               title={!isExpanded ? mod.label : undefined}
               className={`group relative flex items-center gap-3 rounded-sm transition-colors ${
                 isExpanded ? 'h-9 px-3' : 'h-10 w-10 justify-center self-center'
@@ -122,7 +121,7 @@ export default function ModuleRail({
                   {mod.label}
                 </span>
               )}
-            </button>
+            </Link>
           );
         })}
 
