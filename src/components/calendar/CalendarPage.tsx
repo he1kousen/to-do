@@ -532,20 +532,36 @@ export default function CalendarPage() {
               />
             </div>
 
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                onClick={() => setShowEventForm(false)}
-                className="rounded-sm border border-cloud px-4 py-2 text-body-md font-medium text-[#6B7280] transition-colors hover:bg-mist"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!formTitle.trim() || !formStart || !formEnd}
-                className="rounded-sm bg-signal-teal px-4 py-2 text-body-md font-medium text-white transition-colors hover:bg-signal-teal-hover disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {editingEvent ? 'Simpan' : 'Buat'}
-              </button>
+            <div className="mt-6 flex items-center justify-between gap-2">
+              {editingEvent ? (
+                <button
+                  onClick={() => {
+                    setShowEventForm(false);
+                    setConfirmDelete(editingEvent.id);
+                  }}
+                  className="flex items-center gap-1.5 rounded-sm px-3 py-2 text-body-md font-medium text-danger transition-colors hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                  Hapus
+                </button>
+              ) : (
+                <span />
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowEventForm(false)}
+                  className="rounded-sm border border-cloud px-4 py-2 text-body-md font-medium text-[#6B7280] transition-colors hover:bg-mist"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!formTitle.trim() || !formStart || !formEnd}
+                  className="rounded-sm bg-signal-teal px-4 py-2 text-body-md font-medium text-white transition-colors hover:bg-signal-teal-hover disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {editingEvent ? 'Simpan' : 'Buat'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
