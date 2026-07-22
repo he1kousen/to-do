@@ -29,9 +29,9 @@ interface KanbanViewProps {
 }
 
 const COLUMNS = [
-  { id: 'todo', title: 'To Do', color: 'bg-slate-400' },
-  { id: 'in_progress', title: 'In Progress', color: 'bg-amber-400' },
-  { id: 'done', title: 'Done', color: 'bg-emerald-400' },
+  { id: 'todo', title: 'To Do', dotColor: 'bg-[#8B929A]' },
+  { id: 'in_progress', title: 'Sedang Dikerjakan', dotColor: 'bg-marigold' },
+  { id: 'done', title: 'Selesai', dotColor: 'bg-moss' },
 ];
 
 export default function KanbanView({
@@ -68,7 +68,6 @@ export default function KanbanView({
     const activeTask = tasks.find((t) => t.id === activeId);
     if (!activeTask) return;
 
-    // Determine if we're over a column or a task
     const overColumn = COLUMNS.find((c) => c.id === overId);
     const overTask = tasks.find((t) => t.id === overId);
 
@@ -81,7 +80,6 @@ export default function KanbanView({
       return;
     }
 
-    // If status changed, update the task
     if (activeTask.status !== newStatus) {
       const updatedTasks = tasks.map((t) =>
         t.id === activeId ? { ...t, status: newStatus } : t
@@ -104,13 +102,11 @@ export default function KanbanView({
     const activeTask = tasks.find((t) => t.id === activeId);
     if (!activeTask) return;
 
-    // Find tasks in the same column
     const columnTasks = getColumnTasks(activeTask.status);
     const overTask = columnTasks.find((t) => t.id === overId);
 
     if (!overTask) return;
 
-    // Reorder within the column
     const oldIndex = columnTasks.findIndex((t) => t.id === activeId);
     const newIndex = columnTasks.findIndex((t) => t.id === overId);
 
@@ -118,20 +114,18 @@ export default function KanbanView({
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved);
 
-    // Update positions
     const updatedColumnTasks = reordered.map((t, i) => ({ ...t, position: i }));
 
-    // Merge with tasks from other columns
     const otherTasks = tasks.filter((t) => t.status !== activeTask.status);
     onReorderTasks([...otherTasks, ...updatedColumnTasks]);
   };
 
   const handleAddTask = (status: string) => {
-    onCreateTask({ title: 'New task', status });
+    onCreateTask({ title: 'Task baru', status });
   };
 
   return (
-    <div className="flex h-full flex-col p-6">
+    <div className="flex h-full flex-col px-6 py-8">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -145,7 +139,7 @@ export default function KanbanView({
               key={column.id}
               id={column.id}
               title={column.title}
-              color={column.color}
+              dotColor={column.dotColor}
               tasks={getColumnTasks(column.id)}
               onUpdateTask={onUpdateTask}
               onDeleteTask={onDeleteTask}
@@ -156,7 +150,7 @@ export default function KanbanView({
 
         <DragOverlay>
           {activeTask && (
-            <div className="w-[280px]">
+            <div className="w-70">
               <KanbanCard
                 task={activeTask}
                 onUpdate={() => {}}

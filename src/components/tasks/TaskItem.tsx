@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Pencil, Trash2, Check, Calendar } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Task } from '@/lib/hooks/use-tasks';
 
@@ -46,10 +47,10 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 rounded-lg border bg-white px-4 py-3 transition-all ${
+      className={`group flex items-center gap-3 rounded-lg border bg-white px-4 py-3 transition-colors ${
         isDragging
-          ? 'z-50 border-indigo-300 shadow-lg'
-          : 'border-slate-200 hover:border-slate-300'
+          ? 'z-50 border-signal-teal shadow-float'
+          : 'border-cloud hover:border-[#C4C9CE]'
       } ${isDone ? 'opacity-60' : ''}`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
@@ -58,27 +59,21 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
       <button
         {...attributes}
         {...listeners}
-        className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center text-slate-300 transition-colors hover:text-slate-500 active:cursor-grabbing"
+        className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center text-[#C4C9CE] transition-colors hover:text-[#8B929A] active:cursor-grabbing"
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-        </svg>
+        <GripVertical className="h-4 w-4" strokeWidth={1.5} />
       </button>
 
       {/* Checkbox */}
       <button
         onClick={() => onToggle(task.id, isDone ? 'todo' : 'done')}
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border-2 transition-colors ${
           isDone
-            ? 'border-emerald-500 bg-emerald-500 text-white'
-            : 'border-slate-300 hover:border-indigo-400'
+            ? 'border-moss bg-moss text-white'
+            : 'border-cloud hover:border-signal-teal'
         }`}
       >
-        {isDone && (
-          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        )}
+        {isDone && <Check className="h-3 w-3" strokeWidth={3} />}
       </button>
 
       {/* Title */}
@@ -96,7 +91,7 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
                 setIsEditing(false);
               }
             }}
-            className="w-full bg-transparent text-sm text-slate-900 outline-none"
+            className="w-full bg-transparent text-body-md text-graphite outline-none"
           />
         ) : (
           <span
@@ -104,22 +99,23 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
               setEditTitle(task.title);
               setIsEditing(true);
             }}
-            className={`block truncate text-sm ${
-              isDone ? 'text-slate-400 line-through' : 'text-slate-900'
+            className={`block truncate text-body-md ${
+              isDone ? 'text-[#8B929A] line-through' : 'text-graphite'
             }`}
           >
             {task.title}
           </span>
         )}
         {task.description && (
-          <p className="mt-0.5 truncate text-xs text-slate-400">{task.description}</p>
+          <p className="mt-0.5 truncate text-body-sm text-[#6B7280]">{task.description}</p>
         )}
       </div>
 
       {/* Due date */}
       {task.due_date && (
-        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
-          {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+        <span className="flex shrink-0 items-center gap-1 rounded-sm bg-mist px-2 py-0.5 text-mono-sm text-[#6B7280]">
+          <Calendar className="h-3 w-3" strokeWidth={1.5} />
+          {new Date(task.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
         </span>
       )}
 
@@ -131,21 +127,17 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
               setEditTitle(task.title);
               setIsEditing(true);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="flex h-6 w-6 items-center justify-center rounded-sm text-[#8B929A] transition-colors hover:bg-mist hover:text-graphite"
             title="Edit"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+            <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
           <button
             onClick={() => setConfirmDelete(true)}
-            className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
-            title="Delete"
+            className="flex h-6 w-6 items-center justify-center rounded-sm text-[#8B929A] transition-colors hover:bg-red-50 hover:text-danger"
+            title="Hapus"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
         </div>
       )}
@@ -154,8 +146,8 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
         isOpen={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         onConfirm={() => onDelete(task.id)}
-        title="Delete task"
-        message={`Are you sure you want to delete "${task.title}"?`}
+        title="Hapus task"
+        message={`Yakin ingin menghapus "${task.title}"?`}
       />
     </div>
   );

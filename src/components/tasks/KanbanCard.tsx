@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Pencil, Trash2, Calendar } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Task } from '@/lib/hooks/use-tasks';
 
@@ -44,10 +45,10 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
       style={style}
       {...attributes}
       {...listeners}
-      className={`group cursor-grab rounded-lg border bg-white p-3 shadow-sm transition-all active:cursor-grabbing ${
+      className={`group cursor-grab rounded-lg border bg-white p-3 transition-colors active:cursor-grabbing ${
         isDragging
-          ? 'z-50 border-indigo-300 shadow-lg'
-          : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+          ? 'z-50 border-signal-teal shadow-float'
+          : 'border-cloud hover:border-[#C4C9CE]'
       }`}
     >
       {/* Title */}
@@ -65,7 +66,7 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
             }
           }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full bg-transparent text-sm text-slate-900 outline-none"
+          className="w-full bg-transparent text-body-md text-graphite outline-none"
         />
       ) : (
         <p
@@ -73,7 +74,7 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
             setEditTitle(task.title);
             setIsEditing(true);
           }}
-          className="text-sm text-slate-900"
+          className="text-body-md text-graphite"
         >
           {task.title}
         </p>
@@ -81,16 +82,17 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
 
       {/* Description */}
       {task.description && (
-        <p className="mt-1 truncate text-xs text-slate-400">{task.description}</p>
+        <p className="mt-1 truncate text-body-sm text-[#6B7280]">{task.description}</p>
       )}
 
       {/* Footer */}
       <div className="mt-2 flex items-center justify-between">
         {task.due_date ? (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
-            {new Date(task.due_date).toLocaleDateString('en-US', {
-              month: 'short',
+          <span className="flex items-center gap-1 text-mono-sm text-[#8B929A]">
+            <Calendar className="h-3 w-3" strokeWidth={1.5} />
+            {new Date(task.due_date).toLocaleDateString('id-ID', {
               day: 'numeric',
+              month: 'short',
             })}
           </span>
         ) : (
@@ -105,22 +107,18 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
               setEditTitle(task.title);
               setIsEditing(true);
             }}
-            className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="flex h-5 w-5 items-center justify-center rounded-sm text-[#8B929A] transition-colors hover:bg-mist hover:text-graphite"
           >
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+            <Pencil className="h-3 w-3" strokeWidth={1.5} />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setConfirmDelete(true);
             }}
-            className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
+            className="flex h-5 w-5 items-center justify-center rounded-sm text-[#8B929A] transition-colors hover:bg-red-50 hover:text-danger"
           >
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+            <Trash2 className="h-3 w-3" strokeWidth={1.5} />
           </button>
         </div>
       </div>
@@ -129,8 +127,8 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
         isOpen={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         onConfirm={() => onDelete(task.id)}
-        title="Delete task"
-        message={`Are you sure you want to delete "${task.title}"?`}
+        title="Hapus task"
+        message={`Yakin ingin menghapus "${task.title}"?`}
       />
     </div>
   );

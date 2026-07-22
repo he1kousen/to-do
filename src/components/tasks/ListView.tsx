@@ -16,6 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { ListChecks, Plus } from 'lucide-react';
 import TaskItem from './TaskItem';
 import type { Task } from '@/lib/hooks/use-tasks';
 
@@ -67,26 +68,27 @@ export default function ListView({
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl p-6">
+    <div className="mx-auto w-full max-w-2xl px-6 py-8">
       {/* Add task input */}
       <div className="mb-6">
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Add a new task..."
+            placeholder="Tambah task baru..."
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleCreateTask();
             }}
-            className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="flex-1 rounded-sm border border-cloud bg-white px-4 py-2.5 text-body-md text-graphite outline-none transition-colors focus:border-signal-teal placeholder:text-[#8B929A]"
           />
           <button
             onClick={handleCreateTask}
             disabled={!newTaskTitle.trim()}
-            className="rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-sm bg-signal-teal px-4 py-2.5 text-body-md font-medium text-white transition-colors hover:bg-signal-teal-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Add
+            <Plus className="h-4 w-4" strokeWidth={2} />
+            Tambah
           </button>
         </div>
       </div>
@@ -115,8 +117,8 @@ export default function ListView({
       {/* Done section */}
       {doneTasks.length > 0 && (
         <div className="mt-8">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Completed ({doneTasks.length})
+          <h3 className="mb-3 text-mono-sm font-medium uppercase tracking-wider text-[#8B929A]">
+            Selesai ({doneTasks.length})
           </h3>
           <SortableContext items={doneTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
@@ -136,9 +138,12 @@ export default function ListView({
 
       {/* Empty state */}
       {tasks.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <span className="mb-3 text-4xl">📝</span>
-          <p className="text-sm text-slate-500">No tasks yet. Add one above to get started.</p>
+        <div className="flex flex-col items-center py-16">
+          <ListChecks className="mb-3 h-10 w-10 text-[#C4C9CE]" strokeWidth={1.5} />
+          <h3 className="text-display-sm text-graphite">Belum ada task</h3>
+          <p className="mt-1 text-body-md text-[#6B7280]">
+            Ketik nama task di atas dan tekan &quot;Tambah&quot; untuk mulai.
+          </p>
         </div>
       )}
     </div>
