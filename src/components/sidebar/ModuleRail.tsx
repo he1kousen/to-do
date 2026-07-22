@@ -10,6 +10,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
+import UserProfile from './UserProfile';
 
 export type ModuleId = 'dashboard' | 'tasks' | 'ideas' | 'calendar';
 
@@ -178,6 +179,9 @@ export default function ModuleRail({
           </button>
         </div>
       )}
+
+      {/* User profile */}
+      <UserProfile isExpanded={isExpanded} />
     </nav>
   );
 }
