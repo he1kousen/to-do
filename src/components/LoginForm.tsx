@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import { CheckSquare } from 'lucide-react';
 
 export default function LoginForm() {
   const supabase = createClient();
@@ -10,26 +11,32 @@ export default function LoginForm() {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: 'openid email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.appdata',
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-(--color-bg)">
+      <div className="w-full max-w-sm rounded-lg border border-cloud bg-white p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            To-Do List
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to manage your tasks
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-sm bg-signal-teal">
+            <CheckSquare className="h-6 w-6 text-white" strokeWidth={2} />
+          </div>
+          <h1 className="text-display-md text-graphite">Personal Management</h1>
+          <p className="mt-1 text-body-md text-[#6B7280]">
+            Masuk untuk mengelola task, ide, dan kalender
           </p>
         </div>
 
         <div className="mt-8">
           <button
             onClick={handleGoogleLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex w-full items-center justify-center gap-3 rounded-sm border border-cloud bg-white px-4 py-2.5 text-body-md font-medium text-graphite transition-colors hover:bg-mist focus:outline-none focus:ring-2 focus:ring-signal-teal focus:ring-offset-2"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -49,9 +56,13 @@ export default function LoginForm() {
                 fill="#EA4335"
               />
             </svg>
-            Sign in with Google
+            Masuk dengan Google
           </button>
         </div>
+
+        <p className="mt-6 text-center text-body-sm text-[#8B929A]">
+          Akses kalender dan drive akan diminta saat login pertama.
+        </p>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { storeRefreshToken } from '@/lib/google-tokens';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -7,14 +8,23 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      // Successfully authenticated, redirect to home
+    if (!error && data.session) {
+      // Store Google refresh token if provided (for Calendar API access)
+      const providerRefreshToken = data.session.provider_refresh_token;
+      if (providerRefreshToken) {
+        try {
+          await storeRefreshToken(data.session.user.id, providerRefreshToken);
+        } catch (err) {
+          // Non-blocking: log but don't prevent login
+          console.error('[auth/callback] Failed to store refresh token:', err);
+        }
+      }
+
       return NextResponse.redirect(`${origin}/`);
     }
   }
 
-  // If there's an error or no code, redirect to login with error
   return NextResponse.redirect(`${origin}/login?error=auth_failed`);
 }
