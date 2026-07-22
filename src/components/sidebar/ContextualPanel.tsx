@@ -13,8 +13,8 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { useCategories } from '@/lib/hooks/use-categories';
-import { useProjects, type Project } from '@/lib/hooks/use-projects';
+import { useAppContext } from '@/lib/contexts/AppContext';
+import type { Project } from '@/lib/hooks/use-projects';
 
 export default function ContextualPanel() {
   const router = useRouter();
@@ -22,8 +22,7 @@ export default function ContextualPanel() {
   const selectedProjectId = searchParams.get('project');
   const selectedCategoryId = searchParams.get('category');
 
-  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
-  const { projects, createProject, updateProject, deleteProject } = useProjects();
+  const { categories, createCategory, updateCategory, deleteCategory, projects, createProject, updateProject, deleteProject } = useAppContext();
 
   // UI state
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());

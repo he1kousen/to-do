@@ -7,15 +7,14 @@ import CategoryView from '@/components/CategoryView';
 import ListView from '@/components/tasks/ListView';
 import KanbanView from '@/components/tasks/KanbanView';
 import { CheckSquare } from 'lucide-react';
-import { useCategories } from '@/lib/hooks/use-categories';
-import { useProjects, type Project } from '@/lib/hooks/use-projects';
+import { useAppContext } from '@/lib/contexts/AppContext';
 import { useTasks } from '@/lib/hooks/use-tasks';
+import type { Project } from '@/lib/hooks/use-projects';
 
 export default function TasksPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { categories } = useCategories();
-  const { projects } = useProjects();
+  const { categories, projects } = useAppContext();
 
   const selectedProjectId = searchParams.get('project');
   const selectedCategoryId = searchParams.get('category');
