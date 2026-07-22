@@ -89,11 +89,24 @@ export function useProjects() {
     return !error;
   };
 
+  const refetch = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: true });
+
+    if (!error && data) {
+      setProjects(data);
+    }
+  };
+
   return {
     projects,
     loading,
     createProject,
     updateProject,
     deleteProject,
+    refetch,
   };
 }
