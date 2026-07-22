@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Task } from '@/lib/hooks/use-tasks';
 
 interface TaskItemProps {
@@ -16,6 +17,7 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [showActions, setShowActions] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const {
     attributes,
@@ -137,7 +139,7 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
             </svg>
           </button>
           <button
-            onClick={() => onDelete(task.id)}
+            onClick={() => setConfirmDelete(true)}
             className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
             title="Delete"
           >
@@ -147,6 +149,14 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => onDelete(task.id)}
+        title="Delete task"
+        message={`Are you sure you want to delete "${task.title}"?`}
+      />
     </div>
   );
 }

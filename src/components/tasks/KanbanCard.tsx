@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Task } from '@/lib/hooks/use-tasks';
 
 interface KanbanCardProps {
@@ -14,6 +15,7 @@ interface KanbanCardProps {
 export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const {
     attributes,
@@ -112,7 +114,7 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(task.id);
+              setConfirmDelete(true);
             }}
             className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
           >
@@ -122,6 +124,14 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => onDelete(task.id)}
+        title="Delete task"
+        message={`Are you sure you want to delete "${task.title}"?`}
+      />
     </div>
   );
 }

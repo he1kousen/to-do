@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Category } from '@/lib/hooks/use-categories';
 import type { Project } from '@/lib/hooks/use-projects';
 
@@ -36,6 +37,8 @@ export default function CategoryItem({
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editingProjectName, setEditingProjectName] = useState('');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [confirmDeleteCategory, setConfirmDeleteCategory] = useState(false);
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState<string | null>(null);
 
   const categoryProjects = projects.filter((p) => p.category_id === category.id);
 
@@ -133,7 +136,7 @@ export default function CategoryItem({
             </svg>
           </button>
           <button
-            onClick={() => onDeleteCategory(category.id)}
+            onClick={() => setConfirmDeleteCategory(true)}
             className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-500/20 hover:text-rose-400"
             title="Delete"
           >
@@ -143,6 +146,15 @@ export default function CategoryItem({
           </button>
         </div>
       </div>
+
+      {/* Confirm delete category dialog */}
+      <ConfirmDialog
+        isOpen={confirmDeleteCategory}
+        onClose={() => setConfirmDeleteCategory(false)}
+        onConfirm={() => onDeleteCategory(category.id)}
+        title="Delete category"
+        message={`Are you sure you want to delete "${category.name}"? All projects and tasks inside it will also be deleted.`}
+      />
 
       {/* Expanded content */}
       {isExpanded && (
@@ -282,7 +294,7 @@ export default function CategoryItem({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteProject(project.id);
+                      setConfirmDeleteProject(project.id);
                       setOpenMenuId(null);
                     }}
                     className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-rose-400 transition-colors hover:bg-white/5"
@@ -294,6 +306,15 @@ export default function CategoryItem({
                   </button>
                 </div>
               )}
+
+              {/* Confirm delete project dialog */}
+              <ConfirmDialog
+                isOpen={confirmDeleteProject === project.id}
+                onClose={() => setConfirmDeleteProject(null)}
+                onConfirm={() => onDeleteProject(project.id)}
+                title="Delete project"
+                message={`Are you sure you want to delete "${project.name}"? All tasks inside it will also be deleted.`}
+              />
             </div>
           ))}
 
