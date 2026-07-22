@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import ModuleRail, { type ModuleId } from '@/components/sidebar/ModuleRail';
 import ContextualPanel from '@/components/sidebar/ContextualPanel';
-import { useCategories, type Category } from '@/lib/hooks/use-categories';
-import { useProjects, type Project } from '@/lib/hooks/use-projects';
 import { useIdeas } from '@/lib/hooks/use-ideas';
 
 interface AppShellProps {
@@ -15,10 +13,6 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
-  const { projects, createProject, updateProject, deleteProject } = useProjects();
   const { ideas } = useIdeas();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [railExpanded, setRailExpanded] = useState(true);
@@ -33,31 +27,7 @@ export default function AppShell({ children }: AppShellProps) {
   }, [pathname]);
 
   const showContextualPanel = activeModule === 'tasks';
-
-  // Selection lives in URL so AppShell sidebar + TasksPage stay in sync
-  const activeProjectId = searchParams.get('project');
-  const activeCategoryId = searchParams.get('category');
-
-  const currentProject = activeProjectId
-    ? projects.find((p) => p.id === activeProjectId) ?? null
-    : null;
-
-  const currentCategory = activeCategoryId
-    ? categories.find((c) => c.id === activeCategoryId) ?? null
-    : null;
-
-  const openTaskCount = 0; // Tasks are now managed per-page
   const unrealizedIdeaCount = ideas.filter((i) => !i.is_realized).length;
-
-  const handleSelectCategory = (category: Category) => {
-    router.push(`/tasks?category=${category.id}`);
-    setMobileMenuOpen(false);
-  };
-
-  const handleSelectProject = (project: Project) => {
-    router.push(`/tasks?project=${project.id}`);
-    setMobileMenuOpen(false);
-  };
 
   return (
     <div className="flex h-screen bg-(--color-bg)">
@@ -67,7 +37,6 @@ export default function AppShell({ children }: AppShellProps) {
           activeModule={activeModule}
           isExpanded={railExpanded}
           onToggleExpand={() => setRailExpanded(!railExpanded)}
-          taskCount={openTaskCount}
           ideaCount={unrealizedIdeaCount}
         />
       </div>
@@ -75,28 +44,7 @@ export default function AppShell({ children }: AppShellProps) {
       {/* ── Desktop: Contextual Panel (Tasks only) ── */}
       {showContextualPanel && (
         <div className="hidden md:flex">
-          <ContextualPanel
-            categories={categories}
-            projects={projects}
-            activeCategoryId={currentCategory?.id ?? null}
-            activeProjectId={currentProject?.id ?? null}
-            onSelectCategory={handleSelectCategory}
-            onSelectProject={handleSelectProject}
-            onCreateCategory={createCategory}
-            onRenameCategory={updateCategory}
-            onDeleteCategory={(id) => {
-              deleteCategory(id);
-              if (activeCategoryId === id || (currentProject && currentProject.category_id === id)) {
-                router.push('/tasks');
-              }
-            }}
-            onCreateProject={createProject}
-            onRenameProject={(id, name) => updateProject(id, { name })}
-            onDeleteProject={(id) => {
-              deleteProject(id);
-              if (activeProjectId === id) router.push('/tasks');
-            }}
-          />
+          <ContextualPanel />
         </div>
       )}
 
@@ -118,33 +66,9 @@ export default function AppShell({ children }: AppShellProps) {
           activeModule={activeModule}
           isExpanded={true}
           onToggleExpand={() => setMobileMenuOpen(false)}
-          taskCount={openTaskCount}
           ideaCount={unrealizedIdeaCount}
         />
-        {showContextualPanel && (
-          <ContextualPanel
-            categories={categories}
-            projects={projects}
-            activeCategoryId={currentCategory?.id ?? null}
-            activeProjectId={currentProject?.id ?? null}
-            onSelectCategory={handleSelectCategory}
-            onSelectProject={handleSelectProject}
-            onCreateCategory={createCategory}
-            onRenameCategory={updateCategory}
-            onDeleteCategory={(id) => {
-              deleteCategory(id);
-              if (activeCategoryId === id || (currentProject && currentProject.category_id === id)) {
-                router.push('/tasks');
-              }
-            }}
-            onCreateProject={createProject}
-            onRenameProject={(id, name) => updateProject(id, { name })}
-            onDeleteProject={(id) => {
-              deleteProject(id);
-              if (activeProjectId === id) router.push('/tasks');
-            }}
-          />
-        )}
+        {showContextualPanel && <ContextualPanel />}
       </div>
 
       {/* ── Main content ── */}
