@@ -1,20 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import EmptyState from '@/components/EmptyState';
 import CategoryView from '@/components/CategoryView';
 import ListView from '@/components/tasks/ListView';
 import KanbanView from '@/components/tasks/KanbanView';
 import { CheckSquare } from 'lucide-react';
-import { useCategories, type Category } from '@/lib/hooks/use-categories';
-import { useProjects, type Project } from '@/lib/hooks/use-projects';
+import { useCategories } from '@/lib/hooks/use-categories';
+import { useProjects } from '@/lib/hooks/use-projects';
 import { useTasks } from '@/lib/hooks/use-tasks';
 
-export default function TasksPage() {
+function TasksPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { categories } = useCategories();
   const { projects } = useProjects();
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
+
+  const projectId = searchParams.get('project');
+  const categoryId = searchParams.get('category');
+
+  const currentProject = projectId
+    ? projects.find((p) => p.id === projectId) ?? null
+    : null;
+
+  const currentCategory = categoryId
+    ? categories.find((c) => c.id === categoryId) ?? null
+    : null;
 
   const {
     tasks,
@@ -22,20 +34,7 @@ export default function TasksPage() {
     updateTask,
     deleteTask,
     reorderTasks,
-  } = useTasks(activeProject?.id ?? null);
-
-  const currentProject = activeProject
-    ? projects.find((p) => p.id === activeProject.id) ?? activeProject
-    : null;
-
-  const currentCategory = activeCategory
-    ? categories.find((c) => c.id === activeCategory.id) ?? activeCategory
-    : null;
-
-  const handleSelectProject = (project: Project) => {
-    setActiveProject(project);
-    setActiveCategory(null);
-  };
+  } = useTasks(currentProject?.id ?? null);
 
   if (currentProject) {
     return (
@@ -79,7 +78,7 @@ export default function TasksPage() {
         category={currentCategory}
         projects={projects}
         tasks={tasks}
-        onSelectProject={handleSelectProject}
+        onSelectProject={(project) => router.push(`/tasks?project=${project.id}`)}
         onCreateProject={() => {}}
       />
     );
@@ -91,5 +90,13 @@ export default function TasksPage() {
       title="Pilih project"
       description="Pilih project dari panel kiri untuk melihat dan mengelola task."
     />
+  );
+}
+
+export default function TasksPage() {
+  return (
+    <Suspense fallback={null}>
+      <TasksPageContent />
+    </Suspense>
   );
 }

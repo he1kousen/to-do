@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import ModuleRail, { type ModuleId } from '@/components/sidebar/ModuleRail';
 import ContextualPanel from '@/components/sidebar/ContextualPanel';
@@ -15,11 +15,11 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
   const { projects, createProject, updateProject, deleteProject } = useProjects();
   const { ideas } = useIdeas();
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [railExpanded, setRailExpanded] = useState(true);
 
@@ -34,25 +34,29 @@ export default function AppShell({ children }: AppShellProps) {
 
   const showContextualPanel = activeModule === 'tasks';
 
-  const currentProject = activeProject
-    ? projects.find((p) => p.id === activeProject.id) ?? activeProject
+  // Selection lives in URL so AppShell sidebar + TasksPage stay in sync
+  const activeProjectId = searchParams.get('project');
+  const activeCategoryId = searchParams.get('category');
+
+  const currentProject = activeProjectId
+    ? projects.find((p) => p.id === activeProjectId) ?? null
     : null;
 
-  const currentCategory = activeCategory
-    ? categories.find((c) => c.id === activeCategory.id) ?? activeCategory
+  const currentCategory = activeCategoryId
+    ? categories.find((c) => c.id === activeCategoryId) ?? null
     : null;
 
   const openTaskCount = 0; // Tasks are now managed per-page
   const unrealizedIdeaCount = ideas.filter((i) => !i.is_realized).length;
 
   const handleSelectCategory = (category: Category) => {
-    setActiveCategory(category);
-    setActiveProject(null);
+    router.push(`/tasks?category=${category.id}`);
+    setMobileMenuOpen(false);
   };
 
   const handleSelectProject = (project: Project) => {
-    setActiveProject(project);
-    setActiveCategory(null);
+    router.push(`/tasks?project=${project.id}`);
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -82,14 +86,15 @@ export default function AppShell({ children }: AppShellProps) {
             onRenameCategory={updateCategory}
             onDeleteCategory={(id) => {
               deleteCategory(id);
-              if (activeCategory?.id === id) setActiveCategory(null);
-              if (activeProject && categories.find((c) => c.id === id)) setActiveProject(null);
+              if (activeCategoryId === id || (currentProject && currentProject.category_id === id)) {
+                router.push('/tasks');
+              }
             }}
             onCreateProject={createProject}
             onRenameProject={(id, name) => updateProject(id, { name })}
             onDeleteProject={(id) => {
               deleteProject(id);
-              if (activeProject?.id === id) setActiveProject(null);
+              if (activeProjectId === id) router.push('/tasks');
             }}
           />
         </div>
@@ -128,14 +133,15 @@ export default function AppShell({ children }: AppShellProps) {
             onRenameCategory={updateCategory}
             onDeleteCategory={(id) => {
               deleteCategory(id);
-              if (activeCategory?.id === id) setActiveCategory(null);
-              if (activeProject && categories.find((c) => c.id === id)) setActiveProject(null);
+              if (activeCategoryId === id || (currentProject && currentProject.category_id === id)) {
+                router.push('/tasks');
+              }
             }}
             onCreateProject={createProject}
             onRenameProject={(id, name) => updateProject(id, { name })}
             onDeleteProject={(id) => {
               deleteProject(id);
-              if (activeProject?.id === id) setActiveProject(null);
+              if (activeProjectId === id) router.push('/tasks');
             }}
           />
         )}
