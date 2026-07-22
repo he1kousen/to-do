@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useCalendar, type CalendarEvent } from '@/lib/hooks/use-calendar';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Pagination from '@/components/ui/Pagination';
+import { usePagination } from '@/lib/hooks/use-pagination';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -209,6 +211,8 @@ export default function CalendarPage() {
       .slice(0, 5);
   }, [events]);
 
+  const eventPagination = usePagination({ items: events, pageSize: 10 });
+
   const viewModes: { key: ViewMode; label: string }[] = [
     { key: 'month', label: 'Bulan' },
     { key: 'week', label: 'Minggu' },
@@ -356,6 +360,7 @@ export default function CalendarPage() {
 
         {/* Week/Day view — simple list */}
         {!loading && (viewMode === 'week' || viewMode === 'day') && (
+          <>
           <div className="space-y-2">
             {events.length === 0 ? (
               <div className="flex flex-col items-center py-16">
@@ -364,7 +369,7 @@ export default function CalendarPage() {
                 <p className="mt-1 text-body-md text-[#6B7280]">Tekan &quot;Tambah Event&quot; untuk menambahkan.</p>
               </div>
             ) : (
-              events.map((event) => (
+              (eventPagination.paginatedItems as CalendarEvent[]).map((event) => (
                 <div
                   key={event.id}
                   className="group flex items-start gap-3 rounded-lg border border-cloud bg-white p-4 transition-colors hover:border-[#C4C9CE]"
@@ -408,6 +413,18 @@ export default function CalendarPage() {
               ))
             )}
           </div>
+
+            {/* Event list pagination */}
+            {eventPagination.totalPages > 1 && (
+              <div className="mt-4">
+                <Pagination
+                  currentPage={eventPagination.currentPage}
+                  totalPages={eventPagination.totalPages}
+                  onPageChange={eventPagination.goToPage}
+                />
+              </div>
+            )}
+          </>
         )}
 
         </div>

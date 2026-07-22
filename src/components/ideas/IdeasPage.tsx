@@ -11,6 +11,8 @@ import {
   Filter,
 } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Pagination from '@/components/ui/Pagination';
+import { usePagination } from '@/lib/hooks/use-pagination';
 import { useIdeas, type Idea } from '@/lib/hooks/use-ideas';
 
 type FilterKey = 'all' | 'realized' | 'not_realized';
@@ -31,6 +33,8 @@ export default function IdeasPage() {
     if (filter === 'not_realized') return !idea.is_realized;
     return true;
   });
+
+  const pagination = usePagination({ items: filteredIdeas, pageSize: 10 });
 
   const handleCreate = () => {
     if (newTitle.trim()) {
@@ -156,7 +160,7 @@ export default function IdeasPage() {
 
         {/* Ideas list */}
         <div className="space-y-2">
-          {filteredIdeas.map((idea) => (
+          {(pagination.paginatedItems as Idea[]).map((idea) => (
             <div
               key={idea.id}
               className={`rounded-lg border bg-white p-4 transition-colors ${
@@ -267,6 +271,17 @@ export default function IdeasPage() {
             </div>
           ))}
         </div>
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={pagination.goToPage}
+            />
+          </div>
+        )}
 
         {/* Empty state */}
         {filteredIdeas.length === 0 && (

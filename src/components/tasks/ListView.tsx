@@ -18,6 +18,8 @@ import {
 } from '@dnd-kit/sortable';
 import { ListChecks, Plus } from 'lucide-react';
 import TaskItem from './TaskItem';
+import Pagination from '@/components/ui/Pagination';
+import { usePagination } from '@/lib/hooks/use-pagination';
 import type { Task } from '@/lib/hooks/use-tasks';
 
 interface ListViewProps {
@@ -27,6 +29,8 @@ interface ListViewProps {
   onDeleteTask: (id: string) => void;
   onReorderTasks: (tasks: Task[]) => void;
 }
+
+const PAGE_SIZE = 10;
 
 export default function ListView({
   tasks,
@@ -44,6 +48,9 @@ export default function ListView({
 
   const todoTasks = tasks.filter((t) => t.status === 'todo');
   const doneTasks = tasks.filter((t) => t.status === 'done');
+
+  const todoPagination = usePagination({ items: todoTasks, pageSize: PAGE_SIZE });
+  const donePagination = usePagination({ items: doneTasks, pageSize: PAGE_SIZE });
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -101,7 +108,7 @@ export default function ListView({
       >
         <SortableContext items={todoTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
-            {todoTasks.map((task) => (
+            {(todoPagination.paginatedItems as Task[]).map((task) => (
               <TaskItem
                 key={task.id}
                 task={task}
@@ -114,6 +121,17 @@ export default function ListView({
         </SortableContext>
       </DndContext>
 
+      {/* Todo pagination */}
+      {todoPagination.totalPages > 1 && (
+        <div className="mt-4">
+          <Pagination
+            currentPage={todoPagination.currentPage}
+            totalPages={todoPagination.totalPages}
+            onPageChange={todoPagination.goToPage}
+          />
+        </div>
+      )}
+
       {/* Done section */}
       {doneTasks.length > 0 && (
         <div className="mt-8">
@@ -122,7 +140,7 @@ export default function ListView({
           </h3>
           <SortableContext items={doneTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
-              {doneTasks.map((task) => (
+              {(donePagination.paginatedItems as Task[]).map((task) => (
                 <TaskItem
                   key={task.id}
                   task={task}
@@ -133,6 +151,17 @@ export default function ListView({
               ))}
             </div>
           </SortableContext>
+
+          {/* Done pagination */}
+          {donePagination.totalPages > 1 && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={donePagination.currentPage}
+                totalPages={donePagination.totalPages}
+                onPageChange={donePagination.goToPage}
+              />
+            </div>
+          )}
         </div>
       )}
 
