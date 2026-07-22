@@ -22,6 +22,7 @@ export default function AppShell() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [railExpanded, setRailExpanded] = useState(false);
 
   const {
     tasks,
@@ -72,6 +73,8 @@ export default function AppShell() {
         <ModuleRail
           activeModule={activeModule}
           onSelectModule={handleSelectModule}
+          isExpanded={railExpanded}
+          onToggleExpand={() => setRailExpanded(!railExpanded)}
           taskCount={openTaskCount}
           ideaCount={unrealizedIdeaCount}
         />
@@ -121,6 +124,8 @@ export default function AppShell() {
         <ModuleRail
           activeModule={activeModule}
           onSelectModule={handleSelectModule}
+          isExpanded={true}
+          onToggleExpand={() => setMobileMenuOpen(false)}
           taskCount={openTaskCount}
           ideaCount={unrealizedIdeaCount}
         />
