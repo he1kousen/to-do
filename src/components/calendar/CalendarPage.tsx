@@ -193,6 +193,22 @@ export default function CalendarPage() {
     return date.toDateString() === today.toDateString();
   };
 
+  // Upcoming events (from today, next 7 days)
+  const upcomingEvents = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const weekLater = new Date(now);
+    weekLater.setDate(weekLater.getDate() + 7);
+
+    return events
+      .filter((e) => {
+        const start = new Date(e.start);
+        return start >= now && start <= weekLater;
+      })
+      .sort((a, b) => a.start.localeCompare(b.start))
+      .slice(0, 5);
+  }, [events]);
+
   const viewModes: { key: ViewMode; label: string }[] = [
     { key: 'month', label: 'Bulan' },
     { key: 'week', label: 'Minggu' },
@@ -247,8 +263,10 @@ export default function CalendarPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
-        {/* Error state */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Calendar main area */}
+        <div className="flex-1 overflow-auto p-6">
+          {/* Error state */}
         {error && (
           <div className="mb-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
             <AlertCircle className="h-5 w-5 shrink-0 text-danger" strokeWidth={1.5} />
@@ -391,6 +409,57 @@ export default function CalendarPage() {
             )}
           </div>
         )}
+
+        </div>
+
+        {/* Upcoming Events sidebar */}
+        <div className="hidden w-72 shrink-0 border-l border-cloud bg-white p-4 lg:block">
+          <h3 className="mb-4 text-display-sm text-graphite">Mendatang</h3>
+
+          {upcomingEvents.length === 0 ? (
+            <div className="flex flex-col items-center py-8 text-center">
+              <CalendarIcon className="mb-2 h-8 w-8 text-[#C4C9CE]" strokeWidth={1.5} />
+              <p className="text-body-sm text-[#8B929A]">Tidak ada event dalam 7 hari ke depan.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {upcomingEvents.map((event) => {
+                const startDate = new Date(event.start);
+                const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+                return (
+                  <button
+                    key={event.id}
+                    onClick={() => openEditForm(event)}
+                    className="group flex w-full items-start gap-3 rounded-sm p-2 text-left transition-colors hover:bg-mist"
+                  >
+                    {/* Date badge */}
+                    <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-sm border border-cloud">
+                      <span className="text-mono-sm font-medium text-[#8B929A]">{dayNames[startDate.getDay()]}</span>
+                      <span className="text-body-lg font-semibold text-graphite leading-none">{startDate.getDate()}</span>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-body-sm font-medium text-graphite group-hover:text-signal-teal">
+                        {event.title}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-2 text-mono-sm text-[#8B929A]">
+                        <Clock className="h-3 w-3" strokeWidth={1.5} />
+                        <span>{formatEventTime(event)}</span>
+                      </div>
+                      {event.location && (
+                        <div className="mt-0.5 flex items-center gap-2 text-mono-sm text-[#8B929A]">
+                          <MapPin className="h-3 w-3" strokeWidth={1.5} />
+                          <span className="truncate">{event.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Event form modal */}
