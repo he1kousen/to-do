@@ -1,26 +1,210 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design Token System — Personal Management App
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Color Palette ── */
+  --color-mist: #F4F6F7;
+  --color-graphite: #1D2229;
+  --color-signal-teal: #0D8A78;
+  --color-signal-teal-hover: #0a7566;
+  --color-signal-teal-focus: #0D8A7833;
+  --color-marigold: #D98E04;
+  --color-moss: #4B7A5A;
+  --color-cloud: #DEE3E7;
+
+  /* ── Derived / Semantic ── */
+  --color-bg: var(--color-mist);
+  --color-bg-surface: #FFFFFF;
+  --color-bg-sidebar: var(--color-graphite);
+  --color-text-primary: var(--color-graphite);
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-text-inverse: #FFFFFF;
+  --color-border: var(--color-cloud);
+  --color-border-strong: #C4C9CE;
+  --color-accent: var(--color-signal-teal);
+  --color-accent-hover: var(--color-signal-teal-hover);
+  --color-focus-ring: var(--color-signal-teal);
+  --color-warning: var(--color-marigold);
+  --color-success: var(--color-moss);
+  --color-danger: #DC2626;
+  --color-danger-hover: #B91C1C;
+
+  /* ── Typography ── */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Work Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Type Scale — manually tuned line-height & letter-spacing */
+  --text-display-lg: 2rem;      /* 32px — page titles */
+  --text-display-lg--lh: 1.2;
+  --text-display-lg--ls: -0.025em;
+
+  --text-display-md: 1.5rem;    /* 24px — section headings */
+  --text-display-md--lh: 1.3;
+  --text-display-md--ls: -0.02em;
+
+  --text-display-sm: 1.125rem;  /* 18px — card titles */
+  --text-display-sm--lh: 1.4;
+  --text-display-sm--ls: -0.015em;
+
+  --text-body-lg: 1rem;         /* 16px — body large */
+  --text-body-lg--lh: 1.6;
+  --text-body-lg--ls: 0;
+
+  --text-body-md: 0.875rem;     /* 14px — body default */
+  --text-body-md--lh: 1.5;
+  --text-body-md--ls: 0;
+
+  --text-body-sm: 0.75rem;      /* 12px — captions, labels */
+  --text-body-sm--lh: 1.4;
+  --text-body-sm--ls: 0.01em;
+
+  --text-mono-sm: 0.75rem;      /* 12px — timestamps, sync status */
+  --text-mono-sm--lh: 1.4;
+  --text-mono-sm--ls: 0.02em;
+
+  /* ── Spacing (4px grid) ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* ── Border Radius ── */
+  --radius-sm: 6px;   /* buttons, inputs, small elements */
+  --radius-lg: 12px;  /* cards, modals, panels */
+
+  /* ── Elevation — border-first, shadow only for floating elements ── */
+  --shadow-float: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* ── Transition ── */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
 }
+
+/* ============================================================
+   Tailwind v4 Theme Extension
+   ============================================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-mist: var(--color-mist);
+  --color-graphite: var(--color-graphite);
+  --color-signal-teal: var(--color-signal-teal);
+  --color-marigold: var(--color-marigold);
+  --color-moss: var(--color-moss);
+  --color-cloud: var(--color-cloud);
+
+  /* Semantic */
+  --color-surface: var(--color-bg-surface);
+  --color-accent: var(--color-accent);
+  --color-warning: var(--color-warning);
+  --color-success: var(--color-success);
+
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================================
+   Base Styles
+   ============================================================ */
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  line-height: var(--text-body-md--lh);
+  letter-spacing: var(--text-body-md--ls);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   Focus States — Signal Teal, always visible for keyboard nav
+   ============================================================ */
+
+*:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Reduced Motion — respect user preference
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Typography Utility Classes
+   ============================================================ */
+
+.text-display-lg {
+  font-family: var(--font-display);
+  font-size: var(--text-display-lg);
+  line-height: var(--text-display-lg--lh);
+  letter-spacing: var(--text-display-lg--ls);
+  font-weight: 700;
+}
+
+.text-display-md {
+  font-family: var(--font-display);
+  font-size: var(--text-display-md);
+  line-height: var(--text-display-md--lh);
+  letter-spacing: var(--text-display-md--ls);
+  font-weight: 600;
+}
+
+.text-display-sm {
+  font-family: var(--font-display);
+  font-size: var(--text-display-sm);
+  line-height: var(--text-display-sm--lh);
+  letter-spacing: var(--text-display-sm--ls);
+  font-weight: 600;
+}
+
+.text-body-lg {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--text-body-lg--lh);
+  letter-spacing: var(--text-body-lg--ls);
+}
+
+.text-body-md {
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  line-height: var(--text-body-md--lh);
+  letter-spacing: var(--text-body-md--ls);
+}
+
+.text-body-sm {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm--lh);
+  letter-spacing: var(--text-body-sm--ls);
+}
+
+.text-mono-sm {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-sm);
+  line-height: var(--text-mono-sm--lh);
+  letter-spacing: var(--text-mono-sm--ls);
 }
