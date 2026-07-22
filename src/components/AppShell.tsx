@@ -4,15 +4,19 @@ import { useState } from 'react';
 import Sidebar from '@/components/sidebar/Sidebar';
 import EmptyState from '@/components/EmptyState';
 import CategoryView from '@/components/CategoryView';
+import IdeasPage from '@/components/ideas/IdeasPage';
 import ListView from '@/components/tasks/ListView';
 import KanbanView from '@/components/tasks/KanbanView';
 import { useCategories, type Category } from '@/lib/hooks/use-categories';
 import { useProjects, type Project } from '@/lib/hooks/use-projects';
 import { useTasks } from '@/lib/hooks/use-tasks';
 
+type View = 'home' | 'ideas';
+
 export default function AppShell() {
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
   const { projects, createProject, updateProject, deleteProject } = useProjects();
+  const [activeView, setActiveView] = useState<View>('home');
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
 
@@ -36,12 +40,20 @@ export default function AppShell() {
 
   const handleSelectCategory = (category: Category) => {
     setActiveCategory(category);
-    setActiveProject(null); // Clear project selection when category is selected
+    setActiveProject(null);
+    setActiveView('home');
   };
 
   const handleSelectProject = (project: Project) => {
     setActiveProject(project);
-    setActiveCategory(null); // Clear category selection when project is selected
+    setActiveCategory(null);
+    setActiveView('home');
+  };
+
+  const handleSelectIdeas = () => {
+    setActiveView('ideas');
+    setActiveCategory(null);
+    setActiveProject(null);
   };
 
   return (
@@ -50,10 +62,12 @@ export default function AppShell() {
       <Sidebar
         categories={categories}
         projects={projects}
-        activeCategoryId={currentCategory?.id ?? null}
-        activeProjectId={currentProject?.id ?? null}
+        activeCategoryId={activeView === 'home' ? currentCategory?.id ?? null : null}
+        activeProjectId={activeView === 'home' ? currentProject?.id ?? null : null}
+        isIdeasActive={activeView === 'ideas'}
         onSelectCategory={handleSelectCategory}
         onSelectProject={handleSelectProject}
+        onSelectIdeas={handleSelectIdeas}
         onCreateCategory={createCategory}
         onRenameCategory={updateCategory}
         onDeleteCategory={(id) => {
@@ -77,7 +91,9 @@ export default function AppShell() {
 
       {/* Main content */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {currentProject ? (
+        {activeView === 'ideas' ? (
+          <IdeasPage />
+        ) : currentProject ? (
           <>
             {/* Project header */}
             <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6">
@@ -121,10 +137,7 @@ export default function AppShell() {
             projects={projects}
             tasks={tasks}
             onSelectProject={handleSelectProject}
-            onCreateProject={() => {
-              // Focus on the sidebar to create a project
-              // For now, just show a message
-            }}
+            onCreateProject={() => {}}
           />
         ) : (
           <EmptyState

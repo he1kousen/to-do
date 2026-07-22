@@ -10,8 +10,10 @@ interface SidebarProps {
   projects: Project[];
   activeCategoryId: string | null;
   activeProjectId: string | null;
+  isIdeasActive: boolean;
   onSelectCategory: (category: Category) => void;
   onSelectProject: (project: Project) => void;
+  onSelectIdeas: () => void;
   onCreateCategory: (name: string) => void;
   onRenameCategory: (id: string, name: string) => void;
   onDeleteCategory: (id: string) => void;
@@ -25,8 +27,10 @@ export default function Sidebar({
   projects,
   activeCategoryId,
   activeProjectId,
+  isIdeasActive,
   onSelectCategory,
   onSelectProject,
+  onSelectIdeas,
   onCreateCategory,
   onRenameCategory,
   onDeleteCategory,
@@ -135,6 +139,21 @@ export default function Sidebar({
             No categories yet. Create one to get started.
           </p>
         )}
+
+        {/* Ideas link */}
+        <div className="mt-4 border-t border-white/10 pt-3">
+          <button
+            onClick={onSelectIdeas}
+            className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+              isIdeasActive
+                ? 'bg-indigo-500/15 text-indigo-300'
+                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+            }`}
+          >
+            <span>💡</span>
+            Ideas
+          </button>
+        </div>
       </div>
 
       {/* Footer */}

@@ -19,6 +19,7 @@ const syncItemSchema = z.object({
   status: z.enum(['todo', 'in_progress', 'done']).optional(),
   due_date: z.string().nullable().optional(),
   position: z.number().int().optional(),
+  is_realized: z.boolean().optional(),
   updated_at: z.string().datetime(),
   deleted_at: z.string().datetime().nullable().optional(),
 });
@@ -36,6 +37,11 @@ const syncRequestSchema = z.object({
     deletes: z.array(z.object({ id: z.string().uuid() })).default([]),
   }),
   tasks: z.object({
+    creates: z.array(syncItemSchema).default([]),
+    updates: z.array(syncItemSchema).default([]),
+    deletes: z.array(z.object({ id: z.string().uuid() })).default([]),
+  }),
+  ideas: z.object({
     creates: z.array(syncItemSchema).default([]),
     updates: z.array(syncItemSchema).default([]),
     deletes: z.array(z.object({ id: z.string().uuid() })).default([]),
@@ -244,6 +250,71 @@ async function applyTaskChanges(
   return results;
 }
 
+async function applyIdeaChanges(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  changes: SyncRequest['ideas'],
+  serverTime: string
+) {
+  const results = { created: 0, updated: 0, deleted: 0 };
+
+  // Process creates
+  for (const item of changes.creates) {
+    const { error } = await supabase.from('ideas').upsert(
+      {
+        id: item.id,
+        user_id: userId,
+        title: item.title!,
+        description: item.description ?? '',
+        is_realized: item.is_realized ?? false,
+        updated_at: item.updated_at,
+        deleted_at: item.deleted_at ?? null,
+      },
+      { onConflict: 'id' }
+    );
+    if (!error) results.created++;
+  }
+
+  // Process updates (last-write-wins)
+  for (const item of changes.updates) {
+    const { data: existing } = await supabase
+      .from('ideas')
+      .select('updated_at')
+      .eq('id', item.id)
+      .single();
+
+    if (!existing || new Date(item.updated_at) > new Date(existing.updated_at)) {
+      const updateData: Record<string, unknown> = {
+        updated_at: item.updated_at,
+        deleted_at: item.deleted_at ?? undefined,
+      };
+      if (item.title !== undefined) updateData.title = item.title;
+      if (item.description !== undefined) updateData.description = item.description;
+      if (item.is_realized !== undefined) updateData.is_realized = item.is_realized;
+
+      const { error } = await supabase
+        .from('ideas')
+        .update(updateData)
+        .eq('id', item.id)
+        .eq('user_id', userId);
+      if (!error) results.updated++;
+    }
+  }
+
+  // Process deletes
+  for (const item of changes.deletes) {
+    const { error } = await supabase
+      .from('ideas')
+      .update({ deleted_at: serverTime })
+      .eq('id', item.id)
+      .eq('user_id', userId)
+      .is('deleted_at', null);
+    if (!error) results.deleted++;
+  }
+
+  return results;
+}
+
 // ============================================================
 // POST /api/sync - Push pending changes and pull updates
 // ============================================================
@@ -270,6 +341,7 @@ export async function POST(request: Request) {
     categories: await applyCategoryChanges(supabase, user.id, result.data.categories, serverTime),
     projects: await applyProjectChanges(supabase, user.id, result.data.projects, serverTime),
     tasks: await applyTaskChanges(supabase, user.id, result.data.tasks, serverTime),
+    ideas: await applyIdeaChanges(supabase, user.id, result.data.ideas, serverTime),
   };
 
   // 2. PULL: Get all rows updated since last_synced_at
@@ -294,6 +366,13 @@ export async function POST(request: Request) {
     .gt('updated_at', result.data.last_synced_at)
     .order('updated_at', { ascending: true });
 
+  const { data: ideas } = await supabase
+    .from('ideas')
+    .select('*')
+    .eq('user_id', user.id)
+    .gt('updated_at', result.data.last_synced_at)
+    .order('updated_at', { ascending: true });
+
   // 3. Return sync results
   return NextResponse.json({
     server_timestamp: serverTime,
@@ -302,6 +381,7 @@ export async function POST(request: Request) {
       categories: categories ?? [],
       projects: projects ?? [],
       tasks: tasks ?? [],
+      ideas: ideas ?? [],
     },
   });
 }
