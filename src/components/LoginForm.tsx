@@ -29,7 +29,7 @@ export default function LoginForm() {
           </div>
           <h1 className="text-display-md text-graphite">Personal Management</h1>
           <p className="mt-1 text-body-md text-[#6B7280]">
-            Masuk untuk mengelola task, ide, dan kalender
+            Hi, Ikhsan! Masuk untuk mengelola kehidupan anda yang pahit itu :D
           </p>
         </div>
 
@@ -60,9 +60,7 @@ export default function LoginForm() {
           </button>
         </div>
 
-        <p className="mt-6 text-center text-body-sm text-[#8B929A]">
-          Akses kalender dan drive akan diminta saat login pertama.
-        </p>
+        
       </div>
     </div>
   );

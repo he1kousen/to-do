@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, CheckSquare, LayoutDashboard, Calendar as CalendarIcon } from 'lucide-react';
+import { Menu, CheckSquare, LayoutDashboard } from 'lucide-react';
 import ModuleRail, { type ModuleId } from '@/components/sidebar/ModuleRail';
 import ContextualPanel from '@/components/sidebar/ContextualPanel';
 import EmptyState from '@/components/EmptyState';
 import CategoryView from '@/components/CategoryView';
 import IdeasPage from '@/components/ideas/IdeasPage';
+import CalendarPage from '@/components/calendar/CalendarPage';
 import ListView from '@/components/tasks/ListView';
 import KanbanView from '@/components/tasks/KanbanView';
 import { useCategories, type Category } from '@/lib/hooks/use-categories';
@@ -183,11 +184,7 @@ export default function AppShell() {
         {activeModule === 'ideas' ? (
           <IdeasPage />
         ) : activeModule === 'calendar' ? (
-          <EmptyState
-            icon={CalendarIcon}
-            title="Kalender"
-            description="Integrasi Google Calendar akan tersedia segera."
-          />
+          <CalendarPage />
         ) : activeModule === 'dashboard' ? (
           <EmptyState
             icon={LayoutDashboard}
