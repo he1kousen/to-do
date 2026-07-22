@@ -5,6 +5,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, Trash2, Calendar } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import TaskDetail from './TaskDetail';
 import type { Task } from '@/lib/hooks/use-tasks';
 
 interface KanbanCardProps {
@@ -17,6 +18,7 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   const {
     attributes,
@@ -79,11 +81,16 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
             />
           ) : (
             <p
-              onDoubleClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetail(true);
+              }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
                 setEditTitle(task.title);
                 setIsEditing(true);
               }}
-              className="text-body-md text-graphite"
+              className="cursor-pointer text-body-md text-graphite hover:text-signal-teal"
             >
               {task.title}
             </p>
@@ -137,6 +144,14 @@ export default function KanbanCard({ task, onUpdate, onDelete }: KanbanCardProps
         title="Hapus task"
         message={`Yakin ingin menghapus "${task.title}"?`}
       />
+
+      {showDetail && (
+        <TaskDetail
+          task={task}
+          onClose={() => setShowDetail(false)}
+          onUpdate={onUpdate}
+        />
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, Trash2, Check, Calendar } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import TaskDetail from './TaskDetail';
 import type { Task } from '@/lib/hooks/use-tasks';
 
 interface TaskItemProps {
@@ -19,6 +20,7 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
   const [editTitle, setEditTitle] = useState(task.title);
   const [showActions, setShowActions] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   const {
     attributes,
@@ -95,12 +97,14 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
           />
         ) : (
           <span
-            onDoubleClick={() => {
+            onClick={() => setShowDetail(true)}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
               setEditTitle(task.title);
               setIsEditing(true);
             }}
-            className={`block truncate text-body-md ${
-              isDone ? 'text-[#8B929A] line-through' : 'text-graphite'
+            className={`block cursor-pointer truncate text-body-md ${
+              isDone ? 'text-[#8B929A] line-through' : 'text-graphite hover:text-signal-teal'
             }`}
           >
             {task.title}
@@ -149,6 +153,14 @@ export default function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskIte
         title="Hapus task"
         message={`Yakin ingin menghapus "${task.title}"?`}
       />
+
+      {showDetail && (
+        <TaskDetail
+          task={task}
+          onClose={() => setShowDetail(false)}
+          onUpdate={onUpdate}
+        />
+      )}
     </div>
   );
 }
