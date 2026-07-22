@@ -1,14 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  Lightbulb,
+  Plus,
+  Pencil,
+  Trash2,
+  Check,
+  Circle,
+  Filter,
+} from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useIdeas, type Idea } from '@/lib/hooks/use-ideas';
 
-type Filter = 'all' | 'realized' | 'not_realized';
+type FilterKey = 'all' | 'realized' | 'not_realized';
 
 export default function IdeasPage() {
   const { ideas, createIdea, updateIdea, deleteIdea, toggleRealized } = useIdeas();
-  const [filter, setFilter] = useState<Filter>('all');
+  const [filter, setFilter] = useState<FilterKey>('all');
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -48,220 +57,249 @@ export default function IdeasPage() {
     }
   };
 
+  const filters: { key: FilterKey; label: string }[] = [
+    { key: 'all', label: 'Semua' },
+    { key: 'not_realized', label: 'Belum Terwujud' },
+    { key: 'realized', label: 'Sudah Terwujud' },
+  ];
+
   return (
-    <div className="flex-1 overflow-auto p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">💡 Ideas</h1>
-          <p className="text-sm text-slate-500">Capture ideas to work on later</p>
-        </div>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
-        >
-          + New Idea
-        </button>
-      </div>
-
-      {/* Filter tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-slate-100 p-1">
-        {([
-          { key: 'all', label: 'All' },
-          { key: 'not_realized', label: '💭 Belum Terwujud' },
-          { key: 'realized', label: '✅ Sudah Terwujud' },
-        ] as const).map(({ key, label }) => (
+    <div className="flex-1 overflow-auto">
+      <div className="mx-auto max-w-2xl px-6 py-8">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Lightbulb className="h-6 w-6 text-marigold" strokeWidth={1.5} />
+            <div>
+              <h1 className="text-display-md text-graphite">Ideas</h1>
+              <p className="text-body-sm text-[#6B7280]">
+                {ideas.length === 0
+                  ? 'Kumpulkan ide untuk dikerjakan nanti'
+                  : `${ideas.filter((i) => !i.is_realized).length} belum terwujud`}
+              </p>
+            </div>
+          </div>
           <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              filter === key
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center gap-2 rounded-sm bg-signal-teal px-4 py-2 text-body-md font-medium text-white transition-colors hover:bg-signal-teal-hover"
           >
-            {label}
+            <Plus className="h-4 w-4" strokeWidth={2} />
+            Tambah Ide
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* Create form */}
-      {showCreateForm && (
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <input
-            autoFocus
-            placeholder="Idea title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-          />
-          <textarea
-            placeholder="Description (optional)"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            rows={2}
-            className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-          />
-          <div className="flex gap-2">
+        {/* Filter tabs */}
+        <div className="mb-6 flex gap-1 rounded-lg border border-cloud bg-mist p-1">
+          {filters.map(({ key, label }) => (
             <button
-              onClick={handleCreate}
-              disabled={!newTitle.trim()}
-              className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-sm px-3 py-1.5 text-body-sm font-medium transition-colors ${
+                filter === key
+                  ? 'bg-white text-graphite shadow-float'
+                  : 'text-[#6B7280] hover:text-graphite'
+              }`}
             >
-              Create
+              {key === 'not_realized' && <Circle className="h-3 w-3" strokeWidth={2} />}
+              {key === 'realized' && <Check className="h-3 w-3 text-moss" strokeWidth={2} />}
+              {label}
             </button>
-            <button
-              onClick={() => {
-                setNewTitle('');
-                setNewDescription('');
-                setShowCreateForm(false);
+          ))}
+        </div>
+
+        {/* Create form */}
+        {showCreateForm && (
+          <div className="mb-6 rounded-lg border border-cloud bg-white p-4">
+            <input
+              autoFocus
+              placeholder="Judul ide"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreate();
+                if (e.key === 'Escape') {
+                  setNewTitle('');
+                  setNewDescription('');
+                  setShowCreateForm(false);
+                }
               }}
-              className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+              className="mb-3 w-full rounded-sm border border-cloud px-3 py-2 text-body-md text-graphite outline-none transition-colors focus:border-signal-teal placeholder:text-[#8B929A]"
+            />
+            <textarea
+              placeholder="Deskripsi (opsional)"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              rows={2}
+              className="mb-3 w-full rounded-sm border border-cloud px-3 py-2 text-body-md text-graphite outline-none transition-colors focus:border-signal-teal placeholder:text-[#8B929A]"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreate}
+                disabled={!newTitle.trim()}
+                className="rounded-sm bg-signal-teal px-4 py-2 text-body-md font-medium text-white transition-colors hover:bg-signal-teal-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Simpan
+              </button>
+              <button
+                onClick={() => {
+                  setNewTitle('');
+                  setNewDescription('');
+                  setShowCreateForm(false);
+                }}
+                className="rounded-sm border border-cloud bg-white px-4 py-2 text-body-md font-medium text-[#6B7280] transition-colors hover:bg-mist"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Ideas list */}
+        <div className="space-y-2">
+          {filteredIdeas.map((idea) => (
+            <div
+              key={idea.id}
+              className={`rounded-lg border bg-white p-4 transition-colors ${
+                idea.is_realized ? 'border-moss/30' : 'border-cloud'
+              }`}
             >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Ideas list */}
-      <div className="space-y-3">
-        {filteredIdeas.map((idea) => (
-          <div
-            key={idea.id}
-            className={`rounded-xl border bg-white p-4 shadow-sm transition-all ${
-              idea.is_realized
-                ? 'border-emerald-200 bg-emerald-50/50'
-                : 'border-slate-200'
-            }`}
-          >
-            {editingId === idea.id ? (
-              /* Edit mode */
-              <div>
-                <input
-                  autoFocus
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-                <textarea
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  rows={2}
-                  className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSaveEdit}
-                    className="rounded-lg bg-indigo-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-indigo-600"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* View mode */
-              <div className="flex items-start gap-3">
-                {/* Toggle realized */}
-                <button
-                  onClick={() => toggleRealized(idea.id)}
-                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                    idea.is_realized
-                      ? 'border-emerald-500 bg-emerald-500 text-white'
-                      : 'border-slate-300 hover:border-indigo-400'
-                  }`}
-                >
-                  {idea.is_realized && (
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className={`text-sm font-semibold ${idea.is_realized ? 'text-emerald-700' : 'text-slate-900'}`}>
-                      {idea.title}
-                    </h3>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        idea.is_realized
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}
+              {editingId === idea.id ? (
+                /* Edit mode */
+                <div>
+                  <input
+                    autoFocus
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveEdit();
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    className="mb-2 w-full rounded-sm border border-cloud px-3 py-2 text-body-md text-graphite outline-none transition-colors focus:border-signal-teal"
+                  />
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={2}
+                    className="mb-3 w-full rounded-sm border border-cloud px-3 py-2 text-body-md text-graphite outline-none transition-colors focus:border-signal-teal"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveEdit}
+                      className="rounded-sm bg-signal-teal px-3 py-1.5 text-body-sm font-medium text-white transition-colors hover:bg-signal-teal-hover"
                     >
-                      {idea.is_realized ? 'Sudah Terwujud' : 'Belum Terwujud'}
-                    </span>
+                      Simpan
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="rounded-sm border border-cloud bg-white px-3 py-1.5 text-body-sm font-medium text-[#6B7280] transition-colors hover:bg-mist"
+                    >
+                      Batal
+                    </button>
                   </div>
-                  {idea.description && (
-                    <p className="mt-1 text-sm text-slate-500">{idea.description}</p>
-                  )}
-                  <p className="mt-2 text-xs text-slate-400">
-                    {new Date(idea.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
                 </div>
+              ) : (
+                /* View mode */
+                <div className="flex items-start gap-3">
+                  {/* Toggle realized */}
+                  <button
+                    onClick={() => toggleRealized(idea.id)}
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                      idea.is_realized
+                        ? 'border-moss bg-moss text-white'
+                        : 'border-cloud hover:border-signal-teal'
+                    }`}
+                    title={idea.is_realized ? 'Tandai belum terwujud' : 'Tandai sudah terwujud'}
+                  >
+                    {idea.is_realized && <Check className="h-3 w-3" strokeWidth={3} />}
+                  </button>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleStartEdit(idea)}
-                    className="flex h-7 w-7 items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                    title="Edit"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete(idea.id)}
-                    className="flex h-7 w-7 items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
-                    title="Delete"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3
+                        className={`text-body-lg font-medium ${
+                          idea.is_realized ? 'text-moss' : 'text-graphite'
+                        }`}
+                      >
+                        {idea.title}
+                      </h3>
+                      <span
+                        className={`rounded-sm px-1.5 py-0.5 text-mono-sm font-medium ${
+                          idea.is_realized
+                            ? 'bg-moss/10 text-moss'
+                            : 'bg-marigold/10 text-marigold'
+                        }`}
+                      >
+                        {idea.is_realized ? 'Sudah Terwujud' : 'Belum Terwujud'}
+                      </span>
+                    </div>
+                    {idea.description && (
+                      <p className="mt-1 text-body-md text-[#6B7280]">{idea.description}</p>
+                    )}
+                    <p className="mt-2 text-mono-sm text-[#8B929A]">
+                      {new Date(idea.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => handleStartEdit(idea)}
+                      className="flex h-7 w-7 items-center justify-center rounded-sm text-[#8B929A] transition-colors hover:bg-mist hover:text-graphite"
+                      title="Edit"
+                    >
+                      <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(idea.id)}
+                      className="flex h-7 w-7 items-center justify-center rounded-sm text-[#8B929A] transition-colors hover:bg-red-50 hover:text-danger"
+                      title="Hapus"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Empty state */}
-      {filteredIdeas.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <span className="mb-3 text-4xl">💡</span>
-          <h3 className="mb-1 text-sm font-semibold text-slate-700">
-            {filter === 'all' ? 'No ideas yet' : filter === 'realized' ? 'No realized ideas' : 'All ideas realized!'}
-          </h3>
-          <p className="text-sm text-slate-500">
-            {filter === 'all' ? 'Capture your first idea above.' : 'Try a different filter.'}
-          </p>
+              )}
+            </div>
+          ))}
         </div>
-      )}
 
-      {/* Confirm delete dialog */}
-      <ConfirmDialog
-        isOpen={confirmDelete !== null}
-        onClose={() => setConfirmDelete(null)}
-        onConfirm={() => {
-          if (confirmDelete) deleteIdea(confirmDelete);
-        }}
-        title="Delete idea"
-        message={`Are you sure you want to delete "${ideas.find((i) => i.id === confirmDelete)?.title}"?`}
-      />
+        {/* Empty state */}
+        {filteredIdeas.length === 0 && (
+          <div className="flex flex-col items-center py-16">
+            <Lightbulb className="mb-3 h-10 w-10 text-[#C4C9CE]" strokeWidth={1.5} />
+            <h3 className="text-display-sm text-graphite">
+              {filter === 'all'
+                ? 'Belum ada ide'
+                : filter === 'realized'
+                  ? 'Belum ada yang terwujud'
+                  : 'Semua ide sudah terwujud'}
+            </h3>
+            <p className="mt-1 text-body-md text-[#6B7280]">
+              {filter === 'all'
+                ? 'Tekan "Tambah Ide" untuk mulai mengumpulkan.'
+                : filter === 'realized'
+                  ? 'Tandai ide yang sudah terwujud dengan ikon centang.'
+                  : 'Kerja bagus! Semua ide sudah jadi kenyataan.'}
+            </p>
+          </div>
+        )}
+
+        {/* Confirm delete dialog */}
+        <ConfirmDialog
+          isOpen={confirmDelete !== null}
+          onClose={() => setConfirmDelete(null)}
+          onConfirm={() => {
+            if (confirmDelete) deleteIdea(confirmDelete);
+          }}
+          title="Hapus ide"
+          message={`Yakin ingin menghapus "${ideas.find((i) => i.id === confirmDelete)?.title}"?`}
+        />
+      </div>
     </div>
   );
 }
