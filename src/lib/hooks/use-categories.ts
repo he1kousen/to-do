@@ -29,6 +29,11 @@ export function useCategories() {
         .is('deleted_at', null)
         .order('created_at', { ascending: true });
 
+      console.log('[useCategories] fetch result:', { data, error });
+      if (error) {
+        console.error('[useCategories] fetch error:', error.message, error.details);
+      }
+
       if (!error && data) {
         setCategories(data);
       }
@@ -39,14 +44,24 @@ export function useCategories() {
   }, [supabase]);
 
   const createCategory = async (name: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('[createCategory] auth user:', user?.id, 'authError:', authError);
+
+    if (!user) {
+      console.error('[createCategory] No authenticated user');
+      return null;
+    }
 
     const { data, error } = await supabase
       .from('categories')
       .insert({ user_id: user.id, name })
       .select()
       .single();
+
+    console.log('[createCategory] insert result:', { data, error });
+    if (error) {
+      console.error('[createCategory] insert error:', error.message, error.details, error.hint);
+    }
 
     if (!error && data) {
       setCategories((prev) => [...prev, data]);
