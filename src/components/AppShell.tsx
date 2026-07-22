@@ -3,15 +3,17 @@
 import { useState } from 'react';
 import Sidebar from '@/components/sidebar/Sidebar';
 import EmptyState from '@/components/EmptyState';
+import CategoryView from '@/components/CategoryView';
 import ListView from '@/components/tasks/ListView';
 import KanbanView from '@/components/tasks/KanbanView';
-import { useCategories } from '@/lib/hooks/use-categories';
+import { useCategories, type Category } from '@/lib/hooks/use-categories';
 import { useProjects, type Project } from '@/lib/hooks/use-projects';
 import { useTasks } from '@/lib/hooks/use-tasks';
 
 export default function AppShell() {
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
   const { projects, createProject, updateProject, deleteProject } = useProjects();
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
 
   const {
@@ -27,18 +29,38 @@ export default function AppShell() {
     ? projects.find((p) => p.id === activeProject.id) ?? activeProject
     : null;
 
+  // Get the latest version of activeCategory
+  const currentCategory = activeCategory
+    ? categories.find((c) => c.id === activeCategory.id) ?? activeCategory
+    : null;
+
+  const handleSelectCategory = (category: Category) => {
+    setActiveCategory(category);
+    setActiveProject(null); // Clear project selection when category is selected
+  };
+
+  const handleSelectProject = (project: Project) => {
+    setActiveProject(project);
+    setActiveCategory(null); // Clear category selection when project is selected
+  };
+
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
       <Sidebar
         categories={categories}
         projects={projects}
+        activeCategoryId={currentCategory?.id ?? null}
         activeProjectId={currentProject?.id ?? null}
-        onSelectProject={setActiveProject}
+        onSelectCategory={handleSelectCategory}
+        onSelectProject={handleSelectProject}
         onCreateCategory={createCategory}
         onRenameCategory={updateCategory}
         onDeleteCategory={(id) => {
           deleteCategory(id);
+          if (activeCategory?.id === id) {
+            setActiveCategory(null);
+          }
           if (activeProject && categories.find((c) => c.id === id)) {
             setActiveProject(null);
           }
@@ -93,6 +115,17 @@ export default function AppShell() {
               )}
             </div>
           </>
+        ) : currentCategory ? (
+          <CategoryView
+            category={currentCategory}
+            projects={projects}
+            tasks={tasks}
+            onSelectProject={handleSelectProject}
+            onCreateProject={() => {
+              // Focus on the sidebar to create a project
+              // For now, just show a message
+            }}
+          />
         ) : (
           <EmptyState
             icon="📋"

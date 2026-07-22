@@ -8,7 +8,9 @@ import type { Project } from '@/lib/hooks/use-projects';
 interface SidebarProps {
   categories: Category[];
   projects: Project[];
+  activeCategoryId: string | null;
   activeProjectId: string | null;
+  onSelectCategory: (category: Category) => void;
   onSelectProject: (project: Project) => void;
   onCreateCategory: (name: string) => void;
   onRenameCategory: (id: string, name: string) => void;
@@ -21,7 +23,9 @@ interface SidebarProps {
 export default function Sidebar({
   categories,
   projects,
+  activeCategoryId,
   activeProjectId,
+  onSelectCategory,
   onSelectProject,
   onCreateCategory,
   onRenameCategory,
@@ -114,7 +118,9 @@ export default function Sidebar({
             key={category.id}
             category={category}
             projects={projects}
+            isActive={activeCategoryId === category.id}
             activeProjectId={activeProjectId}
+            onSelectCategory={onSelectCategory}
             onSelectProject={onSelectProject}
             onRenameCategory={onRenameCategory}
             onDeleteCategory={onDeleteCategory}

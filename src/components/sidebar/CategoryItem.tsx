@@ -8,7 +8,9 @@ import type { Project } from '@/lib/hooks/use-projects';
 interface CategoryItemProps {
   category: Category;
   projects: Project[];
+  isActive: boolean;
   activeProjectId: string | null;
+  onSelectCategory: (category: Category) => void;
   onSelectProject: (project: Project) => void;
   onRenameCategory: (id: string, name: string) => void;
   onDeleteCategory: (id: string) => void;
@@ -20,7 +22,9 @@ interface CategoryItemProps {
 export default function CategoryItem({
   category,
   projects,
+  isActive,
   activeProjectId,
+  onSelectCategory,
   onSelectProject,
   onRenameCategory,
   onDeleteCategory,
@@ -67,7 +71,7 @@ export default function CategoryItem({
   return (
     <div className="mb-1">
       {/* Category header */}
-      <div className="group flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5">
+      <div className={`group flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${isActive ? 'bg-indigo-500/15' : 'hover:bg-white/5'}`}>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400 transition-colors hover:text-slate-200"
@@ -82,7 +86,10 @@ export default function CategoryItem({
           </svg>
         </button>
 
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div
+          onClick={() => onSelectCategory(category)}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2"
+        >
           <span className="text-indigo-400">📁</span>
           {isEditing ? (
             <input
@@ -97,15 +104,17 @@ export default function CategoryItem({
                   setIsEditing(false);
                 }
               }}
+              onClick={(e) => e.stopPropagation()}
               className="flex-1 bg-transparent text-sm font-medium text-slate-200 outline-none"
             />
           ) : (
             <span
-              onDoubleClick={() => {
+              onDoubleClick={(e) => {
+                e.stopPropagation();
                 setEditName(category.name);
                 setIsEditing(true);
               }}
-              className="truncate text-sm font-medium text-slate-200"
+              className={`truncate text-sm font-medium ${isActive ? 'text-indigo-300' : 'text-slate-200'}`}
             >
               {category.name}
             </span>
