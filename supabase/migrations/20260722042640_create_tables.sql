@@ -3,14 +3,11 @@
 -- Spec: docs/spec.md, Section 3 (Data Model)
 -- ============================================================
 
--- Enable the uuid-ossp extension for uuid_generate_v4()
-create extension if not exists "uuid-ossp";
-
 -- ============================================================
 -- 1. CATEGORIES
 -- ============================================================
 create table categories (
-  id         uuid primary key default uuid_generate_v4(),
+  id         uuid primary key default gen_random_uuid(),
   user_id    uuid not null references auth.users(id) on delete cascade,
   name       text not null check (char_length(name) > 0),
   created_at timestamptz not null default now(),
@@ -27,7 +24,7 @@ create index idx_categories_updated_at on categories(updated_at);
 -- 2. PROJECTS
 -- ============================================================
 create table projects (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users(id) on delete cascade,
   category_id uuid not null references categories(id) on delete cascade,
   name        text not null check (char_length(name) > 0),
@@ -46,7 +43,7 @@ create index idx_projects_updated_at on projects(updated_at);
 -- 3. TASKS
 -- ============================================================
 create table tasks (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users(id) on delete cascade,
   project_id  uuid not null references projects(id) on delete cascade,
   title       text not null check (char_length(title) > 0),
