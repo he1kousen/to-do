@@ -22,7 +22,7 @@ export default function AppShell() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [railExpanded, setRailExpanded] = useState(false);
+  const [railExpanded, setRailExpanded] = useState(true);
 
   const {
     tasks,
