@@ -40,20 +40,29 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
+      setLoading(true);
       try {
-        const res = await fetch('/api/dashboard');
+        // Avoid stale cached dashboard after soft-deletes
+        const res = await fetch('/api/dashboard', { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
-          setData(json);
+          if (!cancelled) setData(json);
         }
       } catch {
         // ignore
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     load();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

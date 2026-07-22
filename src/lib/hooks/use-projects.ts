@@ -78,9 +78,18 @@ export function useProjects() {
   };
 
   const deleteProject = async (id: string) => {
+    const now = new Date().toISOString();
+
+    // Soft-delete project + nested tasks so dashboard counts stay accurate
+    await supabase
+      .from('tasks')
+      .update({ deleted_at: now })
+      .eq('project_id', id)
+      .is('deleted_at', null);
+
     const { error } = await supabase
       .from('projects')
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: now })
       .eq('id', id);
 
     if (!error) {

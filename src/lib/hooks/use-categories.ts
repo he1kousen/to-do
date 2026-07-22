@@ -29,11 +29,6 @@ export function useCategories() {
         .is('deleted_at', null)
         .order('created_at', { ascending: true });
 
-      console.log('[useCategories] fetch result:', { data, error });
-      if (error) {
-        console.error('[useCategories] fetch error:', error.message, error.details);
-      }
-
       if (!error && data) {
         setCategories(data);
       }
@@ -44,24 +39,16 @@ export function useCategories() {
   }, [supabase]);
 
   const createCategory = async (name: string) => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    console.log('[createCategory] auth user:', user?.id, 'authError:', authError);
-
-    if (!user) {
-      console.error('[createCategory] No authenticated user');
-      return null;
-    }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
 
     const { data, error } = await supabase
       .from('categories')
       .insert({ user_id: user.id, name })
       .select()
       .single();
-
-    console.log('[createCategory] insert result:', { data, error });
-    if (error) {
-      console.error('[createCategory] insert error:', error.message, error.details, error.hint);
-    }
 
     if (!error && data) {
       setCategories((prev) => [...prev, data]);
@@ -84,9 +71,34 @@ export function useCategories() {
   };
 
   const deleteCategory = async (id: string) => {
+    const now = new Date().toISOString();
+
+    // Soft-delete category + nested projects + tasks so dashboard/sync stay consistent
+    const { data: nestedProjects } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('category_id', id)
+      .is('deleted_at', null);
+
+    const projectIds = (nestedProjects ?? []).map((p) => p.id);
+
+    if (projectIds.length > 0) {
+      await supabase
+        .from('tasks')
+        .update({ deleted_at: now })
+        .in('project_id', projectIds)
+        .is('deleted_at', null);
+
+      await supabase
+        .from('projects')
+        .update({ deleted_at: now })
+        .in('id', projectIds)
+        .is('deleted_at', null);
+    }
+
     const { error } = await supabase
       .from('categories')
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: now })
       .eq('id', id);
 
     if (!error) {

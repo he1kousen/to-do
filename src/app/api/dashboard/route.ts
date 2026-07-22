@@ -10,6 +10,7 @@ export async function GET() {
   const supabase = await createClient();
 
   // 1. Tasks summary per project
+  // Only active (non soft-deleted) projects/tasks are counted.
   const { data: projects } = await supabase
     .from('projects')
     .select('id, name, view_type')
@@ -19,12 +20,15 @@ export async function GET() {
 
   const { data: allTasks } = await supabase
     .from('tasks')
-    .select('id, project_id, status')
+    .select('id, project_id, status, deleted_at')
     .eq('user_id', user.id)
     .is('deleted_at', null);
 
+  const activeProjectIds = new Set((projects ?? []).map((p) => p.id));
+  const activeTasks = (allTasks ?? []).filter((t) => activeProjectIds.has(t.project_id));
+
   const tasksByProject = (projects ?? []).map((project) => {
-    const projectTasks = (allTasks ?? []).filter((t) => t.project_id === project.id);
+    const projectTasks = activeTasks.filter((t) => t.project_id === project.id);
     return {
       id: project.id,
       name: project.name,
@@ -36,7 +40,7 @@ export async function GET() {
     };
   });
 
-  // 2. Ideas summary
+  // 2. Ideas summary (exclude soft-deleted)
   const { data: allIdeas } = await supabase
     .from('ideas')
     .select('id, is_realized')
