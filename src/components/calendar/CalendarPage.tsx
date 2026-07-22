@@ -18,6 +18,22 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 type ViewMode = 'month' | 'week' | 'day';
 
+// Format date as YYYY-MM-DD in local timezone (not UTC)
+function toLocalDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+// Format date as YYYY-MM-DDTHH:MM in local timezone
+function toLocalDatetimeStr(date: Date): string {
+  const datePart = toLocalDateStr(date);
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${datePart}T${h}:${min}`;
+}
+
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents, createEvent, updateEvent, deleteEvent } = useCalendar();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -86,8 +102,8 @@ export default function CalendarPage() {
       now.setHours(now.getHours() + 1);
       const end = new Date(now);
       end.setHours(end.getHours() + 1);
-      setFormStart(now.toISOString().slice(0, 16));
-      setFormEnd(end.toISOString().slice(0, 16));
+      setFormStart(toLocalDatetimeStr(now));
+      setFormEnd(toLocalDatetimeStr(end));
     }
     setShowEventForm(true);
   };
@@ -151,7 +167,7 @@ export default function CalendarPage() {
 
   // Get events for a specific date
   const getEventsForDate = (date: Date): CalendarEvent[] => {
-    const dateStr = date.toISOString().slice(0, 10);
+    const dateStr = toLocalDateStr(date);
     return events.filter((e) => e.start.slice(0, 10) === dateStr);
   };
 
@@ -281,9 +297,9 @@ export default function CalendarPage() {
 
                 return (
                   <div
-                    key={date.toISOString()}
+                    key={toLocalDateStr(date)}
                     className="min-h-[100px] cursor-pointer border-b border-r border-cloud transition-colors hover:bg-mist/50"
-                    onClick={() => openCreateForm(date.toISOString().slice(0, 10))}
+                    onClick={() => openCreateForm(toLocalDateStr(date))}
                   >
                     <div className="p-1.5">
                       <span
